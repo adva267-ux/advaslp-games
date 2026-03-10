@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בנה פרצוף 🎨</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #FFF6E9;
+  --card:    #FFFFFF;
+  --border:  #F0E4D4;
+  --text:    #3D2C1E;
+  --muted:   #B89B80;
+  --accent:  #FF8C61;
+  --accent2: #A78BFA;
+  --skin:    #FDDBB4;
+  --skin-s:  #F5BC82;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Baloo 2', cursive;
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 8% 12%,  #FFECD855 0%, transparent 40%),
+    radial-gradient(ellipse at 92% 88%, #E4D4FF44 0%, transparent 38%);
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 12px 48px;
+  color: var(--text);
+}
+
+.header { text-align: center; margin-bottom: 24px; }
+h1 {
+  font-size: 2.4rem; font-weight: 800;
+  background: linear-gradient(135deg, #FF8C61, #A78BFA);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+}
+.subtitle { font-size: 0.88rem; color: var(--muted); font-weight: 600; }
+
+.game-container {
+  display: flex; gap: 24px; align-items: flex-start;
+  width: 100%; max-width: 940px; flex-wrap: wrap; justify-content: center;
+}
+
+.face-wrapper { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+
+#faceContainer { position: relative; width: 280px; height: 330px; cursor: default; }
+#faceContainer.drag-over #faceSvg { filter: drop-shadow(0 0 20px #A78BFA88); transition: filter 0.2s; }
+#faceSvg { display: block; overflow: visible; }
+
+.drop-hint { opacity: 0; transition: opacity 0.25s; pointer-events: none; }
+#faceContainer.drag-over .drop-hint { opacity: 1; }
+
+.drag-ghost {
+  position: fixed; pointer-events: none; opacity: 0.82;
+  transform: translate(-50%,-50%) scale(1.06); z-index: 9999;
+  filter: drop-shadow(0 6px 14px rgba(100,60,180,0.3));
+}
+
+.emotion-tag {
+  font-size: 1rem; font-weight: 700; color: var(--text);
+  background: var(--card); padding: 7px 22px; border-radius: 50px;
+  box-shadow: 0 3px 14px rgba(180,130,80,0.14); border: 2.5px solid var(--border);
+  min-width: 170px; text-align: center; transition: all 0.3s;
+}
+
+.btn-reset {
+  background: linear-gradient(135deg, #FF8C61, #F97316);
+  color: white; border: none; padding: 9px 28px; border-radius: 50px;
+  font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.95rem;
+  cursor: pointer; box-shadow: 0 4px 0 #C45A20, 0 6px 16px #F9731640;
+  transition: all 0.15s;
+}
+.btn-reset:hover  { transform: translateY(-2px); }
+.btn-reset:active { transform: translateY(3px); box-shadow: 0 1px 0 #C45A20; }
+
+.controls-panel {
+  display: flex; flex-direction: column; gap: 14px;
+  flex: 1; min-width: 300px; max-width: 560px;
+}
+
+.category-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab-btn {
+  background: var(--card); border: 2.5px solid var(--border);
+  border-radius: 50px; padding: 7px 16px;
+  font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.86rem;
+  cursor: pointer; transition: all 0.18s; color: var(--muted);
+}
+.tab-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+.tab-btn.active {
+  background: linear-gradient(135deg, #FF8C61, #F97316);
+  color: white; border-color: transparent;
+  box-shadow: 0 4px 0 #C45A20, 0 6px 14px #F9731640; transform: translateY(-2px);
+}
+
+.options-container {
+  background: var(--card); border-radius: 28px; padding: 20px 18px 16px;
+  box-shadow: 0 6px 28px rgba(180,130,80,0.1); border: 2.5px solid var(--border);
+}
+.options-title { font-size: 1.05rem; font-weight: 800; color: var(--text); margin-bottom: 14px; }
+.options-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+
+.option-card {
+  background: #FFFAF5; border: 2.5px solid var(--border); border-radius: 20px;
+  padding: 10px 8px 9px; cursor: grab;
+  transition: all 0.2s cubic-bezier(0.34,1.5,0.64,1);
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  user-select: none;
+}
+.option-card:hover  { border-color: var(--accent); transform: translateY(-5px) scale(1.03); box-shadow: 0 10px 22px #FF8C6130; }
+.option-card.selected { border-color: var(--accent2); background: #F5F0FF; box-shadow: 0 0 0 3px #A78BFA30; transform: translateY(-4px); }
+.option-card:active { cursor: grabbing; }
+
+.option-card[data-cat="eyes"]     .option-preview { background: #FFE8D4; }
+.option-card[data-cat="eyebrows"] .option-preview { background: #EDE6FF; }
+.option-card[data-cat="nose"]     .option-preview { background: #FFF4CC; }
+.option-card[data-cat="mouth"]    .option-preview { background: #FFE0EA; }
+.option-card[data-cat="ears"]     .option-preview { background: #D4F5E8; }
+.option-card[data-cat="accessories"] .option-preview { background: #FFF0CC; }
+
+.option-preview {
+  width: 94px; height: 56px; display: flex; align-items: center; justify-content: center;
+  border-radius: 14px; overflow: hidden; padding: 4px;
+}
+.option-preview svg { width: 100%; height: 100%; }
+
+.option-label { font-size: 0.73rem; font-weight: 700; color: var(--muted); text-align: center; line-height: 1.25; }
+.option-card.selected .option-label { color: var(--accent2); }
+.drag-hint { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 10px; font-weight: 600; }
+
+/* ── SPEAK BUTTON ── */
+.btn-speak {
+  background: linear-gradient(135deg, #A78BFA, #7C5CF5);
+  color: white; border: none; padding: 9px 28px; border-radius: 50px;
+  font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.95rem;
+  cursor: pointer; box-shadow: 0 4px 0 #5A3DC8, 0 6px 16px #A78BFA40;
+  transition: all 0.15s; display: flex; align-items: center; gap: 8px;
+}
+.btn-speak:hover  { transform: translateY(-2px); box-shadow: 0 6px 0 #5A3DC8, 0 8px 20px #A78BFA50; }
+.btn-speak:active { transform: translateY(3px); box-shadow: 0 1px 0 #5A3DC8; }
+.btn-speak:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-speak .speak-icon { font-size: 1.1rem; transition: transform 0.3s; }
+.btn-speak.speaking .speak-icon { animation: speakPulse 0.6s ease-in-out infinite alternate; }
+@keyframes speakPulse { from { transform: scale(1); } to { transform: scale(1.3); } }
+
+.face-buttons { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎨 בנה פרצוף!</h1>
+  <p class="subtitle">גרור חלקים לתוך הפנים, או לחץ עליהם לבחירה</p>
+</div>
+
+<div class="game-container">
+  <div class="face-wrapper">
+    <div id="faceContainer">
+      <!--
+        Face SVG: 280 × 330
+        Face ellipse: cx=140 cy=172 rx=118 ry=136
+
+        Part absolute positions (designed to sit perfectly on face):
+          Ears L:   x≈10,  y≈128  (behind face)
+          Ears R:   x≈242, y≈128
+          Eyebrows: centered at y≈94,  span x≈38–242
+          Eyes:     centered at y≈128, eye L cx≈88, eye R cx≈192
+          Nose:     centered at x≈140, y≈178
+          Mouth:    centered at x≈140, y≈238
+      -->
+      <svg id="faceSvg" width="280" height="330" viewBox="0 0 280 330" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="fShadow" x="-15%" y="-10%" width="130%" height="130%">
+            <feDropShadow dx="0" dy="8" stdDeviation="11" flood-color="#D49060" flood-opacity="0.2"/>
+          </filter>
+          <!-- Eyes: normal -->
+          <clipPath id="f_cl"><ellipse cx="88"  cy="128" rx="25" ry="18"/></clipPath>
+          <clipPath id="f_cr"><ellipse cx="192" cy="128" rx="25" ry="18"/></clipPath>
+          <radialGradient id="f_irisNorm" cx="40%" cy="35%" r="60%">
+            <stop offset="0%"   stop-color="#6B8EC4"/>
+            <stop offset="55%"  stop-color="#3A5A8C"/>
+            <stop offset="100%" stop-color="#1A2A4A"/>
+          </radialGradient>
+          <!-- Eyes: sad -->
+          <clipPath id="f_sdl"><ellipse cx="88"  cy="130" rx="24" ry="17"/></clipPath>
+          <clipPath id="f_sdr"><ellipse cx="192" cy="130" rx="24" ry="17"/></clipPath>
+          <radialGradient id="f_irisSad" cx="40%" cy="40%" r="60%">
+            <stop offset="0%"   stop-color="#7AAAD4"/>
+            <stop offset="60%"  stop-color="#4A7AAA"/>
+            <stop offset="100%" stop-color="#1E3A5A"/>
+          </radialGradient>
+          <!-- Eyes: angry -->
+          <clipPath id="f_agl"><ellipse cx="88"  cy="130" rx="24" ry="16"/></clipPath>
+          <clipPath id="f_agr"><ellipse cx="192" cy="130" rx="24" ry="16"/></clipPath>
+          <radialGradient id="f_irisAngry" cx="40%" cy="35%" r="60%">
+            <stop offset="0%"   stop-color="#CC4455"/>
+            <stop offset="55%"  stop-color="#882233"/>
+            <stop offset="100%" stop-color="#440011"/>
+          </radialGradient>
+          <!-- Eyes: surprised -->
+          <clipPath id="f_supl"><circle cx="88"  cy="128" r="26"/></clipPath>
+          <clipPath id="f_supr"><circle cx="192" cy="128" r="26"/></clipPath>
+          <radialGradient id="f_irisSup" cx="40%" cy="35%" r="60%">
+            <stop offset="0%"   stop-color="#5A8AD4"/>
+            <stop offset="55%"  stop-color="#2A4A8C"/>
+            <stop offset="100%" stop-color="#0A1A4A"/>
+          </radialGradient>
+          <!-- Eyes: wink -->
+          <clipPath id="f_wkl"><ellipse cx="88" cy="128" rx="25" ry="18"/></clipPath>
+          <!-- Eyes: sleepy -->
+          <clipPath id="f_sll"><ellipse cx="88"  cy="133" rx="25" ry="11"/></clipPath>
+          <clipPath id="f_slr"><ellipse cx="192" cy="133" rx="25" ry="11"/></clipPath>
+          <!-- Eyes: stars glow -->
+          <radialGradient id="f_starGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#FFEE44" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#FFAA00" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Ears (rendered behind face) -->
+        <g id="gEarLeft"></g>
+        <g id="gEarRight"></g>
+
+        <!-- Face base -->
+        <ellipse cx="140" cy="172" rx="118" ry="136" fill="#FDDBB4" filter="url(#fShadow)"/>
+        <ellipse cx="140" cy="172" rx="118" ry="136" fill="none" stroke="#3D2C1E" stroke-width="3.5"/>
+
+        <!-- Forehead shine -->
+        <ellipse cx="116" cy="100" rx="30" ry="18" fill="white" opacity="0.22"/>
+
+        <!-- Cheek blush -->
+        <ellipse cx="52"  cy="216" rx="28" ry="17" fill="#FF9E7A" opacity="0.26"/>
+        <ellipse cx="228" cy="216" rx="28" ry="17" fill="#FF9E7A" opacity="0.26"/>
+
+        <!-- Empty zone hints -->
+        <g id="emptyHints">
+          <rect x="38"  y="80"  width="204" height="26" rx="13" fill="#E8E0FF" opacity="0.55"/>
+          <text x="140" y="97"  text-anchor="middle" font-family="Baloo 2,cursive" font-size="10" font-weight="700" fill="#8B6FD4">גבות</text>
+          <rect x="38"  y="108" width="204" height="46" rx="16" fill="#FFD6B0" opacity="0.5"/>
+          <text x="140" y="136" text-anchor="middle" font-family="Baloo 2,cursive" font-size="10" font-weight="700" fill="#D07030">עיניים</text>
+          <rect x="108" y="158" width="64"  height="54" rx="16" fill="#FFF0C0" opacity="0.6"/>
+          <text x="140" y="189" text-anchor="middle" font-family="Baloo 2,cursive" font-size="10" font-weight="700" fill="#B08010">אף</text>
+          <rect x="60"  y="216" width="160" height="58" rx="18" fill="#FFD0DF" opacity="0.55"/>
+          <text x="140" y="250" text-anchor="middle" font-family="Baloo 2,cursive" font-size="10" font-weight="700" fill="#C0305A">פה</text>
+          <rect x="8"   y="116" width="28"  height="68" rx="12" fill="#C0F0DE" opacity="0.65"/>
+          <rect x="244" y="116" width="28"  height="68" rx="12" fill="#C0F0DE" opacity="0.65"/>
+          <text x="22"  y="154" text-anchor="middle" font-family="Baloo 2,cursive" font-size="8" font-weight="700" fill="#2A8060">אוזן</text>
+          <text x="258" y="154" text-anchor="middle" font-family="Baloo 2,cursive" font-size="8" font-weight="700" fill="#2A8060">אוזן</text>
+        </g>
+
+        <!-- Drag-over glow -->
+        <g class="drop-hint">
+          <rect x="38"  y="80"  width="204" height="26" rx="13" fill="#A78BFA" opacity="0.15"/>
+          <rect x="38"  y="108" width="204" height="46" rx="16" fill="#FF8C61" opacity="0.12"/>
+          <rect x="108" y="158" width="64"  height="54" rx="16" fill="#FFD700" opacity="0.14"/>
+          <rect x="60"  y="216" width="160" height="58" rx="18" fill="#FF8C61" opacity="0.12"/>
+        </g>
+
+        <!-- Face parts (rendered in ABSOLUTE face coordinates) -->
+        <g id="gEyebrows"></g>
+        <g id="gEyes"></g>
+        <g id="gNose"></g>
+        <g id="gMouth"></g>
+        <!-- Accessories (on top) -->
+        <g id="gGlasses"></g>
+        <g id="gMustache"></g>
+        <g id="gHat"></g>
+      </svg>
+    </div>
+    <div class="emotion-tag" id="emotionTag">🙂 גרור פריטים לפנים!</div>
+    <div class="face-buttons">
+      <button class="btn-speak" id="btnSpeak" onclick="speakFace()" disabled>
+        <span class="speak-icon">🔊</span> הקרא פרצוף
+      </button>
+      <button class="btn-reset" onclick="resetFace()">🔄 אפס</button>
+    </div>
+  </div>
+
+  <div class="controls-panel">
+    <div class="category-tabs">
+      <button class="tab-btn active" onclick="selectCategory('eyes')"     id="tab-eyes">👁️ עיניים</button>
+      <button class="tab-btn"        onclick="selectCategory('eyebrows')" id="tab-eyebrows">〰️ גבות</button>
+      <button class="tab-btn"        onclick="selectCategory('nose')"     id="tab-nose">👃 אף</button>
+      <button class="tab-btn"        onclick="selectCategory('mouth')"    id="tab-mouth">👄 פה</button>
+      <button class="tab-btn"        onclick="selectCategory('ears')"     id="tab-ears">👂 אוזניים</button>
+      <button class="tab-btn"        onclick="selectCategory('accessories')" id="tab-accessories">🎩 אביזרים</button>
+    </div>
+    <div class="options-container">
+      <div class="options-title" id="optionsTitle">👁️ עיניים</div>
+      <div class="options-grid"  id="optionsGrid"></div>
+      <div class="drag-hint">✋ גרור לפנים • לחץ לבחירה</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  STRATEGY: every svgContent uses ABSOLUTE coordinates that
+//  match the face SVG (0 0 280 330). No <g transform> needed.
+//
+//  Face reference points:
+//    Face center: 140, 172
+//    Eye L center: 88, 128    Eye R center: 192, 128
+//    Brow L center: 88, 90    Brow R center: 192, 90
+//    Nose center: 140, 183
+//    Mouth center: 140, 248
+//    Ear L: ~18, 150          Ear R: ~262, 150
+// ═══════════════════════════════════════════════════════════════
+
+// Preview SVGs use a simplified isolated coordinate space
+// so they look good in the small card box.
+
+const parts = {
+
+  // ══════════════════════════════════════════════════════
+  //  EYES  —  detailed, realistic-ish cartoon style
+  //  Eye L center: (88, 128)   Eye R center: (192, 128)
+  //  Eyelid clipPaths keep iris inside the eye opening
+  // ══════════════════════════════════════════════════════
+  eyes: [
+    { id:'eyes_normal', label:'רגיל', emotion:'ניטרלי',
+      face:`<!-- uses f_cl f_cr f_irisNorm from main defs -->
+      <!-- whites -->
+      <ellipse cx="88"  cy="128" rx="25" ry="18" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+      <ellipse cx="192" cy="128" rx="25" ry="18" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+      <!-- iris + pupil -->
+      <circle cx="88"  cy="129" r="14" fill="url(#f_irisNorm)" clip-path="url(#f_cl)"/>
+      <circle cx="88"  cy="129" r="7"  fill="#0D0D0D"     clip-path="url(#cl)"/>
+      <circle cx="192" cy="129" r="14" fill="url(#f_irisNorm)" clip-path="url(#f_cr)"/>
+      <circle cx="192" cy="129" r="7"  fill="#0D0D0D"     clip-path="url(#cr)"/>
+      <!-- catchlight -->
+      <circle cx="94"  cy="122" r="4.5" fill="white" opacity="0.9"/>
+      <circle cx="198" cy="122" r="4.5" fill="white" opacity="0.9"/>
+      <circle cx="84"  cy="132" r="2"   fill="white" opacity="0.5"/>
+      <circle cx="188" cy="132" r="2"   fill="white" opacity="0.5"/>
+      <!-- upper eyelid shadow -->
+      <path d="M63 118 Q88 110 113 118" fill="none" stroke="#C4956A" stroke-width="3.5" stroke-linecap="round" opacity="0.6"/>
+      <path d="M167 118 Q192 110 217 118" fill="none" stroke="#C4956A" stroke-width="3.5" stroke-linecap="round" opacity="0.6"/>
+      <!-- lashes top -->
+      <path d="M63 118 Q68 113 70 116 Q73 111 76 115 Q80 109 83 114 Q87 108 90 113 Q95 109 98 114 Q103 110 106 115 Q110 112 113 117" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <path d="M167 118 Q172 113 174 116 Q177 111 180 115 Q184 109 187 114 Q191 108 194 113 Q199 109 202 114 Q207 110 210 115 Q214 112 217 117" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>`,
+      preview:`<svg viewBox="55 104 170 52" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="pcl"><ellipse cx="88"  cy="128" rx="25" ry="18"/></clipPath>
+          <clipPath id="pcr"><ellipse cx="192" cy="128" rx="25" ry="18"/></clipPath>
+          <radialGradient id="pig" cx="40%" cy="35%" r="60%">
+            <stop offset="0%"   stop-color="#6B8EC4"/>
+            <stop offset="55%"  stop-color="#3A5A8C"/>
+            <stop offset="100%" stop-color="#1A2A4A"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="88"  cy="128" rx="25" ry="18" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+        <ellipse cx="192" cy="128" rx="25" ry="18" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+        <circle cx="88"  cy="129" r="14" fill="url(#pig)" clip-path="url(#pcl)"/>
+        <circle cx="88"  cy="129" r="7"  fill="#0D0D0D"   clip-path="url(#pcl)"/>
+        <circle cx="192" cy="129" r="14" fill="url(#pig)" clip-path="url(#pcr)"/>
+        <circle cx="192" cy="129" r="7"  fill="#0D0D0D"   clip-path="url(#pcr)"/>
+        <circle cx="94"  cy="122" r="4.5" fill="white" opacity="0.9"/>
+        <circle cx="198" cy="122" r="4.5" fill="white" opacity="0.9"/>
+        <path d="M63 118 Q68 113 71 116 Q75 110 80 114 Q86 108 90 113 Q96 109 102 114 Q108 111 113 117" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+        <path d="M167 118 Q172 113 175 116 Q179 110 184 114 Q190 108 194 113 Q200 109 206 114 Q212 111 217 117" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      </svg>` },
+
+    { id:'eyes_happy', label:'שמח', emotion:'שמח',
+      face:`<!-- happy/closed crescent eyes with lashes -->
+      <path d="M63 128 Q88 106 113 128" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M167 128 Q192 106 217 128" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- lash fans -->
+      <line x1="70"  y1="123" x2="67"  y2="116" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <line x1="80"  y1="117" x2="79"  y2="110" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <line x1="90"  y1="114" x2="91"  y2="107" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <line x1="100" y1="117" x2="102" y2="110" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <line x1="108" y1="122" x2="112" y2="117" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <line x1="174" y1="123" x2="171" y2="116" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <line x1="184" y1="117" x2="183" y2="110" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <line x1="194" y1="114" x2="195" y2="107" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <line x1="204" y1="117" x2="206" y2="110" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <line x1="212" y1="122" x2="216" y2="117" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>`,
+      preview:`<svg viewBox="55 100 170 42" xmlns="http://www.w3.org/2000/svg">
+        <path d="M63 128 Q88 106 113 128" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M167 128 Q192 106 217 128" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="70"  y1="123" x2="67"  y2="116" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+        <line x1="82"  y1="116" x2="81"  y2="109" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+        <line x1="94"  y1="113" x2="95"  y2="106" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+        <line x1="106" y1="116" x2="108" y2="110" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+        <line x1="174" y1="123" x2="171" y2="116" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+        <line x1="186" y1="116" x2="185" y2="109" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+        <line x1="198" y1="113" x2="199" y2="106" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+        <line x1="210" y1="116" x2="212" y2="110" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      </svg>` },
+
+    { id:'eyes_sad', label:'עצוב', emotion:'עצוב',
+      face:`<!-- uses f_sdl f_sdr f_irisSad from main defs -->
+      <ellipse cx="88"  cy="130" rx="24" ry="17" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+      <ellipse cx="192" cy="130" rx="24" ry="17" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+      <circle cx="88"  cy="130" r="12" fill="url(#f_irisSad)" clip-path="url(#f_sdl)"/>
+      <circle cx="88"  cy="130" r="6"  fill="#0D0D0D"      clip-path="url(#sdl)"/>
+      <circle cx="192" cy="130" r="12" fill="url(#sdIris)" clip-path="url(#f_sdr)"/>
+      <circle cx="192" cy="130" r="6"  fill="#0D0D0D"      clip-path="url(#sdr)"/>
+      <circle cx="93"  cy="124" r="4"  fill="white" opacity="0.85"/>
+      <circle cx="197" cy="124" r="4"  fill="white" opacity="0.85"/>
+      <!-- drooping upper lids -->
+      <path d="M64 122 Q88 116 112 122" fill="#C8906A" opacity="0.35"/>
+      <path d="M168 122 Q192 116 216 122" fill="#C8906A" opacity="0.35"/>
+      <!-- tear tracks -->
+      <path d="M85 144 Q83 156 82 166" fill="none" stroke="#AACCEE" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+      <path d="M189 144 Q187 156 186 166" fill="none" stroke="#AACCEE" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+      <ellipse cx="82"  cy="168" rx="4" ry="5" fill="#CCE8FF" opacity="0.9"/>
+      <ellipse cx="186" cy="168" rx="4" ry="5" fill="#CCE8FF" opacity="0.9"/>`,
+      preview:`<svg viewBox="55 108 170 66" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="psdl"><ellipse cx="88"  cy="130" rx="24" ry="17"/></clipPath>
+          <clipPath id="psdr"><ellipse cx="192" cy="130" rx="24" ry="17"/></clipPath>
+          <radialGradient id="psdIris" cx="40%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#7AAAD4"/><stop offset="60%" stop-color="#4A7AAA"/><stop offset="100%" stop-color="#1E3A5A"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="88"  cy="130" rx="24" ry="17" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+        <ellipse cx="192" cy="130" rx="24" ry="17" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+        <circle cx="88"  cy="130" r="12" fill="url(#psdIris)" clip-path="url(#psdl)"/>
+        <circle cx="88"  cy="130" r="6"  fill="#0D0D0D" clip-path="url(#psdl)"/>
+        <circle cx="192" cy="130" r="12" fill="url(#psdIris)" clip-path="url(#psdr)"/>
+        <circle cx="192" cy="130" r="6"  fill="#0D0D0D" clip-path="url(#psdr)"/>
+        <circle cx="93"  cy="124" r="4"  fill="white" opacity="0.85"/>
+        <circle cx="197" cy="124" r="4"  fill="white" opacity="0.85"/>
+        <path d="M85 144 Q83 152 82 160" fill="none" stroke="#AACCEE" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+        <path d="M189 144 Q187 152 186 160" fill="none" stroke="#AACCEE" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+        <ellipse cx="82"  cy="162" rx="4" ry="5" fill="#CCE8FF" opacity="0.9"/>
+        <ellipse cx="186" cy="162" rx="4" ry="5" fill="#CCE8FF" opacity="0.9"/>
+      </svg>` },
+
+    { id:'eyes_angry', label:'כועס', emotion:'כועס',
+      face:`<!-- uses f_agl f_agr f_irisAngry from main defs -->
+      <ellipse cx="88"  cy="130" rx="24" ry="16" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+      <ellipse cx="192" cy="130" rx="24" ry="16" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+      <circle cx="88"  cy="130" r="12" fill="url(#f_irisAngry)" clip-path="url(#f_agl)"/>
+      <circle cx="88"  cy="130" r="6"  fill="#0D0D0D"      clip-path="url(#agl)"/>
+      <circle cx="192" cy="130" r="12" fill="url(#agIris)" clip-path="url(#f_agr)"/>
+      <circle cx="192" cy="130" r="6"  fill="#0D0D0D"      clip-path="url(#agr)"/>
+      <circle cx="94"  cy="123" r="4"  fill="white" opacity="0.8"/>
+      <circle cx="198" cy="123" r="4"  fill="white" opacity="0.8"/>
+      <!-- inner corner redness -->
+      <ellipse cx="66"  cy="130" rx="6" ry="5" fill="#FF6666" opacity="0.35"/>
+      <ellipse cx="214" cy="130" rx="6" ry="5" fill="#FF6666" opacity="0.35"/>
+      <!-- tension lines above -->
+      <path d="M64 120 Q76 126 88 121" fill="none" stroke="#AA3333" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+      <path d="M192 121 Q204 126 216 120" fill="none" stroke="#AA3333" stroke-width="2" stroke-linecap="round" opacity="0.6"/>`,
+      preview:`<svg viewBox="55 108 170 46" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="pagl"><ellipse cx="88"  cy="130" rx="24" ry="16"/></clipPath>
+          <clipPath id="pagr"><ellipse cx="192" cy="130" rx="24" ry="16"/></clipPath>
+          <radialGradient id="pagIris" cx="40%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#CC4455"/><stop offset="55%" stop-color="#882233"/><stop offset="100%" stop-color="#440011"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="88"  cy="130" rx="24" ry="16" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+        <ellipse cx="192" cy="130" rx="24" ry="16" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+        <circle cx="88"  cy="130" r="12" fill="url(#pagIris)" clip-path="url(#pagl)"/>
+        <circle cx="88"  cy="130" r="6"  fill="#0D0D0D" clip-path="url(#pagl)"/>
+        <circle cx="192" cy="130" r="12" fill="url(#pagIris)" clip-path="url(#pagr)"/>
+        <circle cx="192" cy="130" r="6"  fill="#0D0D0D" clip-path="url(#pagr)"/>
+        <circle cx="94"  cy="123" r="4"  fill="white" opacity="0.8"/>
+        <circle cx="198" cy="123" r="4"  fill="white" opacity="0.8"/>
+      </svg>` },
+
+    { id:'eyes_surprised', label:'מופתע', emotion:'מופתע',
+      face:`<!-- uses f_supl f_supr f_irisSup from main defs -->
+      <!-- wider whites for surprise -->
+      <circle cx="88"  cy="128" r="26" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2.5"/>
+      <circle cx="192" cy="128" r="26" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2.5"/>
+      <circle cx="88"  cy="128" r="17" fill="url(#f_irisSup)" clip-path="url(#f_supl)"/>
+      <circle cx="88"  cy="128" r="9"  fill="#0D0D0D"       clip-path="url(#supl)"/>
+      <circle cx="192" cy="128" r="17" fill="url(#supIris)" clip-path="url(#f_supr)"/>
+      <circle cx="192" cy="128" r="9"  fill="#0D0D0D"       clip-path="url(#supr)"/>
+      <circle cx="95"  cy="120" r="5.5" fill="white" opacity="0.9"/>
+      <circle cx="199" cy="120" r="5.5" fill="white" opacity="0.9"/>
+      <!-- all-around whites showing (upper and lower) -->
+      <path d="M63 114 Q88 106 113 114" fill="none" stroke="#3D2C1E" stroke-width="2" opacity="0.5"/>
+      <path d="M167 114 Q192 106 217 114" fill="none" stroke="#3D2C1E" stroke-width="2" opacity="0.5"/>`,
+      preview:`<svg viewBox="55 98 170 62" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="psupl"><circle cx="88"  cy="128" r="26"/></clipPath>
+          <clipPath id="psupr"><circle cx="192" cy="128" r="26"/></clipPath>
+          <radialGradient id="psupIris" cx="40%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#5A8AD4"/><stop offset="55%" stop-color="#2A4A8C"/><stop offset="100%" stop-color="#0A1A4A"/>
+          </radialGradient>
+        </defs>
+        <circle cx="88"  cy="128" r="26" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2.5"/>
+        <circle cx="192" cy="128" r="26" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2.5"/>
+        <circle cx="88"  cy="128" r="17" fill="url(#psupIris)" clip-path="url(#psupl)"/>
+        <circle cx="88"  cy="128" r="9"  fill="#0D0D0D" clip-path="url(#psupl)"/>
+        <circle cx="192" cy="128" r="17" fill="url(#psupIris)" clip-path="url(#psupr)"/>
+        <circle cx="192" cy="128" r="9"  fill="#0D0D0D" clip-path="url(#psupr)"/>
+        <circle cx="95"  cy="120" r="5.5" fill="white" opacity="0.9"/>
+        <circle cx="199" cy="120" r="5.5" fill="white" opacity="0.9"/>
+      </svg>` },
+
+    { id:'eyes_wink', label:'עין אחת', emotion:'שובב',
+      face:`<!-- uses f_wkl f_irisNorm from main defs -->
+      <!-- left eye open -->
+      <ellipse cx="88" cy="128" rx="25" ry="18" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+      <circle  cx="88" cy="128" r="14" fill="url(#f_irisNorm)" clip-path="url(#f_wkl)"/>
+      <circle  cx="88" cy="128" r="7"  fill="#0D0D0D"      clip-path="url(#wkl)"/>
+      <circle  cx="94" cy="122" r="4.5" fill="white" opacity="0.9"/>
+      <path d="M63 118 Q68 113 71 116 Q76 109 81 114 Q87 108 90 113 Q96 109 102 114 Q108 111 113 117" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <!-- right eye winked -->
+      <path d="M167 128 Q192 112 217 128" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M170 126 Q192 118 214 126" fill="none" stroke="#3D2C1E" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+      <line x1="178" y1="122" x2="176" y2="115" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <line x1="188" y1="118" x2="187" y2="111" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <line x1="198" y1="118" x2="198" y2="111" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <line x1="207" y1="122" x2="210" y2="116" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>`,
+      preview:`<svg viewBox="55 104 170 44" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="pwkl"><ellipse cx="88" cy="128" rx="25" ry="18"/></clipPath>
+          <radialGradient id="pwkIris" cx="40%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#6B8EC4"/><stop offset="55%" stop-color="#3A5A8C"/><stop offset="100%" stop-color="#1A2A4A"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="88" cy="128" rx="25" ry="18" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+        <circle  cx="88" cy="128" r="14" fill="url(#pwkIris)" clip-path="url(#pwkl)"/>
+        <circle  cx="88" cy="128" r="7"  fill="#0D0D0D" clip-path="url(#pwkl)"/>
+        <circle  cx="94" cy="122" r="4.5" fill="white" opacity="0.9"/>
+        <path d="M63 118 Q68 113 71 116 Q76 109 81 114 Q87 108 90 113 Q96 109 102 114 Q108 111 113 117" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+        <path d="M167 128 Q192 112 217 128" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="178" y1="122" x2="176" y2="115" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+        <line x1="192" y1="118" x2="192" y2="111" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+        <line x1="207" y1="122" x2="210" y2="116" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      </svg>` },
+
+    { id:'eyes_sleepy', label:'ישנוני', emotion:'ישנוני',
+      face:`<!-- uses f_sll f_slr from main defs -->
+      <!-- lower whites only (half-closed) -->
+      <ellipse cx="88"  cy="133" rx="25" ry="11" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+      <ellipse cx="192" cy="133" rx="25" ry="11" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+      <!-- pupils visible at bottom -->
+      <circle cx="88"  cy="136" r="9" fill="#2A2A2A" clip-path="url(#f_sll)"/>
+      <circle cx="192" cy="136" r="9" fill="#2A2A2A" clip-path="url(#f_slr)"/>
+      <!-- heavy upper lid covering top half -->
+      <path d="M63 133 Q88 120 113 133" fill="#F5BC82" stroke="#3D2C1E" stroke-width="2"/>
+      <path d="M167 133 Q192 120 217 133" fill="#F5BC82" stroke="#3D2C1E" stroke-width="2"/>
+      <!-- droopy lashes -->
+      <path d="M66 132 Q70 138 68 142" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <path d="M77 127 Q78 134 76 138" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <path d="M91 123 Q91 130 89 134" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <path d="M105 127 Q104 134 102 138" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <path d="M170 132 Q174 138 172 142" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <path d="M181 127 Q182 134 180 138" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <path d="M195 123 Q195 130 193 134" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <path d="M209 127 Q208 134 206 138" fill="none" stroke="#2A1A0E" stroke-width="2" stroke-linecap="round"/>
+      <!-- z z z -->
+      <text x="150" y="112" font-family="Baloo 2,cursive" font-size="16" font-weight="800" fill="#A78BFA">z</text>
+      <text x="167" y="100" font-family="Baloo 2,cursive" font-size="11" font-weight="700" fill="#C5B0FF">z</text>`,
+      preview:`<svg viewBox="55 108 170 46" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="psll"><ellipse cx="88"  cy="133" rx="25" ry="11"/></clipPath>
+          <clipPath id="pslr"><ellipse cx="192" cy="133" rx="25" ry="11"/></clipPath>
+        </defs>
+        <ellipse cx="88"  cy="133" rx="25" ry="11" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+        <ellipse cx="192" cy="133" rx="25" ry="11" fill="#F8F4EE" stroke="#3D2C1E" stroke-width="2"/>
+        <circle cx="88"  cy="136" r="9" fill="#2A2A2A" clip-path="url(#psll)"/>
+        <circle cx="192" cy="136" r="9" fill="#2A2A2A" clip-path="url(#pslr)"/>
+        <path d="M63 133 Q88 120 113 133" fill="#F5BC82" stroke="#3D2C1E" stroke-width="2"/>
+        <path d="M167 133 Q192 120 217 133" fill="#F5BC82" stroke="#3D2C1E" stroke-width="2"/>
+        <text x="152" y="124" font-family="Baloo 2,cursive" font-size="14" font-weight="800" fill="#A78BFA">z</text>
+      </svg>` },
+
+    { id:'eyes_stars', label:'כוכבים', emotion:'מתלהב',
+      face:`<!-- uses f_starGlow from main defs -->
+      <circle cx="88"  cy="128" r="28" fill="url(#f_starGlow)"/>
+      <circle cx="192" cy="128" r="28" fill="url(#starGlow)"/>
+      <text x="88"  y="142" text-anchor="middle" font-size="36" fill="#FFD700" font-family="sans-serif"
+            style="filter:drop-shadow(0 0 4px #FF8800)">★</text>
+      <text x="192" y="142" text-anchor="middle" font-size="36" fill="#FFD700" font-family="sans-serif"
+            style="filter:drop-shadow(0 0 4px #FF8800)">★</text>
+      <!-- sparkles around -->
+      <text x="68"  y="112" font-size="12" fill="#FFDD44" font-family="sans-serif">✦</text>
+      <text x="112" y="108" font-size="10" fill="#FFCC22" font-family="sans-serif">✦</text>
+      <text x="172" y="112" font-size="12" fill="#FFDD44" font-family="sans-serif">✦</text>
+      <text x="214" y="108" font-size="10" fill="#FFCC22" font-family="sans-serif">✦</text>`,
+      preview:`<svg viewBox="52 100 176 56" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="pstarGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FFEE44" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#FFAA00" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="88"  cy="128" r="26" fill="url(#pstarGlow)"/>
+        <circle cx="192" cy="128" r="26" fill="url(#pstarGlow)"/>
+        <text x="88"  y="142" text-anchor="middle" font-size="36" fill="#FFD700" font-family="sans-serif">★</text>
+        <text x="192" y="142" text-anchor="middle" font-size="36" fill="#FFD700" font-family="sans-serif">★</text>
+        <text x="68" y="112" font-size="11" fill="#FFDD44" font-family="sans-serif">✦</text>
+        <text x="214" y="112" font-size="11" fill="#FFDD44" font-family="sans-serif">✦</text>
+      </svg>` },
+
+    // ── FUN EYE OBJECTS ──
+    { id:'eyes_oranges', label:'תפוזים', emotion:'שובב',
+      face:`
+        <!-- orange slice left -->
+        <circle cx="88" cy="128" r="24" fill="#FF8C00" stroke="#CC5500" stroke-width="2.5"/>
+        <circle cx="88" cy="128" r="14" fill="#FFAA22"/>
+        <circle cx="88" cy="128" r="5"  fill="#FFD060"/>
+        <line x1="88" y1="104" x2="88" y2="152" stroke="#CC5500" stroke-width="1.5" opacity="0.6"/>
+        <line x1="64" y1="128" x2="112" y2="128" stroke="#CC5500" stroke-width="1.5" opacity="0.6"/>
+        <line x1="71" y1="111" x2="105" y2="145" stroke="#CC5500" stroke-width="1.2" opacity="0.5"/>
+        <line x1="105" y1="111" x2="71" y2="145" stroke="#CC5500" stroke-width="1.2" opacity="0.5"/>
+        <!-- orange slice right -->
+        <circle cx="192" cy="128" r="24" fill="#FF8C00" stroke="#CC5500" stroke-width="2.5"/>
+        <circle cx="192" cy="128" r="14" fill="#FFAA22"/>
+        <circle cx="192" cy="128" r="5"  fill="#FFD060"/>
+        <line x1="192" y1="104" x2="192" y2="152" stroke="#CC5500" stroke-width="1.5" opacity="0.6"/>
+        <line x1="168" y1="128" x2="216" y2="128" stroke="#CC5500" stroke-width="1.5" opacity="0.6"/>
+        <line x1="175" y1="111" x2="209" y2="145" stroke="#CC5500" stroke-width="1.2" opacity="0.5"/>
+        <line x1="209" y1="111" x2="175" y2="145" stroke="#CC5500" stroke-width="1.2" opacity="0.5"/>`,
+      preview:`<svg viewBox="56 100 168 56" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="88"  cy="128" r="24" fill="#FF8C00" stroke="#CC5500" stroke-width="2.5"/>
+        <circle cx="88"  cy="128" r="14" fill="#FFAA22"/>
+        <circle cx="88"  cy="128" r="5"  fill="#FFD060"/>
+        <line x1="88"  y1="104" x2="88"  y2="152" stroke="#CC5500" stroke-width="1.5" opacity="0.6"/>
+        <line x1="64"  y1="128" x2="112" y2="128" stroke="#CC5500" stroke-width="1.5" opacity="0.6"/>
+        <line x1="71"  y1="111" x2="105" y2="145" stroke="#CC5500" stroke-width="1.2" opacity="0.5"/>
+        <circle cx="192" cy="128" r="24" fill="#FF8C00" stroke="#CC5500" stroke-width="2.5"/>
+        <circle cx="192" cy="128" r="14" fill="#FFAA22"/>
+        <circle cx="192" cy="128" r="5"  fill="#FFD060"/>
+        <line x1="192" y1="104" x2="192" y2="152" stroke="#CC5500" stroke-width="1.5" opacity="0.6"/>
+        <line x1="168" y1="128" x2="216" y2="128" stroke="#CC5500" stroke-width="1.5" opacity="0.6"/>
+      </svg>` },
+
+    { id:'eyes_buttons', label:'כפתורים', emotion:'מתלהב',
+      face:`
+        <!-- left button eye -->
+        <circle cx="88" cy="128" r="23" fill="#2255AA" stroke="#112244" stroke-width="3"/>
+        <circle cx="88" cy="128" r="16" fill="#3366CC"/>
+        <circle cx="88" cy="128" r="9"  fill="#2255AA" stroke="#112244" stroke-width="1.5"/>
+        <circle cx="82" cy="122" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="94" cy="122" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="82" cy="134" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="94" cy="134" r="3"  fill="white" opacity="0.9"/>
+        <!-- thread X -->
+        <line x1="83" y1="123" x2="93" y2="133" stroke="#7799CC" stroke-width="1.2" opacity="0.7"/>
+        <line x1="93" y1="123" x2="83" y2="133" stroke="#7799CC" stroke-width="1.2" opacity="0.7"/>
+        <!-- right button eye -->
+        <circle cx="192" cy="128" r="23" fill="#2255AA" stroke="#112244" stroke-width="3"/>
+        <circle cx="192" cy="128" r="16" fill="#3366CC"/>
+        <circle cx="192" cy="128" r="9"  fill="#2255AA" stroke="#112244" stroke-width="1.5"/>
+        <circle cx="186" cy="122" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="198" cy="122" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="186" cy="134" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="198" cy="134" r="3"  fill="white" opacity="0.9"/>
+        <line x1="187" y1="123" x2="197" y2="133" stroke="#7799CC" stroke-width="1.2" opacity="0.7"/>
+        <line x1="197" y1="123" x2="187" y2="133" stroke="#7799CC" stroke-width="1.2" opacity="0.7"/>`,
+      preview:`<svg viewBox="58 100 168 56" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="88"  cy="128" r="23" fill="#2255AA" stroke="#112244" stroke-width="3"/>
+        <circle cx="88"  cy="128" r="16" fill="#3366CC"/>
+        <circle cx="88"  cy="128" r="9"  fill="#2255AA" stroke="#112244" stroke-width="1.5"/>
+        <circle cx="82"  cy="122" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="94"  cy="122" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="82"  cy="134" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="94"  cy="134" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="192" cy="128" r="23" fill="#2255AA" stroke="#112244" stroke-width="3"/>
+        <circle cx="192" cy="128" r="16" fill="#3366CC"/>
+        <circle cx="192" cy="128" r="9"  fill="#2255AA" stroke="#112244" stroke-width="1.5"/>
+        <circle cx="186" cy="122" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="198" cy="122" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="186" cy="134" r="3"  fill="white" opacity="0.9"/>
+        <circle cx="198" cy="134" r="3"  fill="white" opacity="0.9"/>
+      </svg>` },
+
+    { id:'eyes_spirals', label:'ספירלות', emotion:'עיוות',
+      face:`
+        <!-- spiral left -->
+        <circle cx="88" cy="128" r="24" fill="white" stroke="#3D2C1E" stroke-width="2"/>
+        <path d="M88 128 m0-14 a14 14 0 1 1 -0.1 0 m0 6 a8 8 0 1 1 -0.1 0 m0 4 a4 4 0 1 1 -0.1 0"
+          fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="88" cy="128" r="2.5" fill="#222"/>
+        <!-- spiral right -->
+        <circle cx="192" cy="128" r="24" fill="white" stroke="#3D2C1E" stroke-width="2"/>
+        <path d="M192 128 m0-14 a14 14 0 1 1 -0.1 0 m0 6 a8 8 0 1 1 -0.1 0 m0 4 a4 4 0 1 1 -0.1 0"
+          fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="192" cy="128" r="2.5" fill="#222"/>`,
+      preview:`<svg viewBox="58 100 168 56" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="88"  cy="128" r="24" fill="white" stroke="#3D2C1E" stroke-width="2"/>
+        <path d="M88 128 m0-14 a14 14 0 1 1 -0.1 0 m0 6 a8 8 0 1 1 -0.1 0 m0 4 a4 4 0 1 1 -0.1 0"
+          fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="88"  cy="128" r="2.5" fill="#222"/>
+        <circle cx="192" cy="128" r="24" fill="white" stroke="#3D2C1E" stroke-width="2"/>
+        <path d="M192 128 m0-14 a14 14 0 1 1 -0.1 0 m0 6 a8 8 0 1 1 -0.1 0 m0 4 a4 4 0 1 1 -0.1 0"
+          fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="192" cy="128" r="2.5" fill="#222"/>
+      </svg>` },
+  ],
+  // ══════════════════════════════════════════════════════
+  //  EYEBROWS  —  expressive filled shapes with clear direction
+  //  Brow L center ≈ (88,90)   Brow R center ≈ (192,90)
+  //  "כלפי מעלה" = raised  "כלפי מטה" = furrowed/lowered inner corners
+  // ══════════════════════════════════════════════════════
+  eyebrows: [
+    // ── neutral: gentle natural arch ──
+    { id:'brow_normal', label:'רגיל', emotion:'ניטרלי',
+      face:`
+        <path d="M46 96 C58 86 72 83 88 85 C104 83 118 86 132 93
+                 C118 90 104 89 88 90 C72 89 58 91 46 96Z" fill="#5C3018"/>
+        <path d="M148 93 C162 86 176 83 192 85 C208 83 222 86 234 96
+                 C222 91 208 89 192 90 C176 89 162 90 148 93Z" fill="#5C3018"/>`,
+      preview:`<svg viewBox="38 78 204 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M46 96 C58 86 72 83 88 85 C104 83 118 86 132 93
+                 C118 90 104 89 88 90 C72 89 58 91 46 96Z" fill="#5C3018"/>
+        <path d="M148 93 C162 86 176 83 192 85 C208 83 222 86 234 96
+                 C222 91 208 89 192 90 C176 89 162 90 148 93Z" fill="#5C3018"/>
+      </svg>` },
+
+    // ── happy: lifted smoothly, relaxed arch ──
+    { id:'brow_happy', label:'שמח', emotion:'שמח',
+      face:`
+        <path d="M46 100 C58 82 74 78 88 80 C102 78 118 82 132 97
+                 C118 92 104 90 88 92 C72 90 58 94 46 100Z" fill="#5C3018"/>
+        <path d="M148 97 C162 82 178 78 192 80 C206 78 222 82 234 100
+                 C222 94 208 90 192 92 C176 90 162 92 148 97Z" fill="#5C3018"/>`,
+      preview:`<svg viewBox="38 74 204 30" xmlns="http://www.w3.org/2000/svg">
+        <path d="M46 100 C58 82 74 78 88 80 C102 78 118 82 132 97
+                 C118 92 104 90 88 92 C72 90 58 94 46 100Z" fill="#5C3018"/>
+        <path d="M148 97 C162 82 178 78 192 80 C206 78 222 82 234 100
+                 C222 94 208 90 192 92 C176 90 162 92 148 97Z" fill="#5C3018"/>
+      </svg>` },
+
+    // ── angry: inner corners pulled sharply DOWN toward nose ──
+    { id:'brow_angry', label:'כועס', emotion:'כועס',
+      face:`
+        <!-- left brow: inner end drops hard toward nose bridge -->
+        <path d="M46 78 C58 84 72 90 88 93 C104 96 118 94 132 90
+                 C118 96 104 100 88 99 C72 98 56 91 46 84Z" fill="#3A1808"/>
+        <!-- right brow: mirror — inner end (left side of right brow) drops -->
+        <path d="M148 90 C162 94 176 96 192 93 C208 90 222 84 234 78
+                 C234 84 222 91 208 98 C192 99 176 98 160 99 C148 96 148 96 148 90Z" fill="#3A1808"/>`,
+      preview:`<svg viewBox="38 74 204 32" xmlns="http://www.w3.org/2000/svg">
+        <path d="M46 78 C58 84 72 90 88 93 C104 96 118 94 132 90
+                 C118 96 104 100 88 99 C72 98 56 91 46 84Z" fill="#3A1808"/>
+        <path d="M148 90 C162 94 176 96 192 93 C208 90 222 84 234 78
+                 C234 84 222 91 208 98 C192 99 176 98 160 99 C148 96 148 96 148 90Z" fill="#3A1808"/>
+      </svg>` },
+
+    // ── sad: inner corners raised, outer ends drooping — "worried" shape ──
+    { id:'brow_sad', label:'עצוב', emotion:'עצוב',
+      face:`
+        <!-- left brow: inner (right) end lifted, outer end droops -->
+        <path d="M46 96 C56 100 68 100 82 94 C96 87 112 82 132 86
+                 C114 86 98 91 84 98 C70 102 56 102 46 100Z" fill="#5C3018"/>
+        <!-- right brow: mirror -->
+        <path d="M148 86 C168 82 184 87 198 94 C212 100 224 100 234 96
+                 C224 102 210 102 196 98 C182 91 166 86 148 86Z" fill="#5C3018"/>`,
+      preview:`<svg viewBox="38 78 204 28" xmlns="http://www.w3.org/2000/svg">
+        <path d="M46 96 C56 100 68 100 82 94 C96 87 112 82 132 86
+                 C114 86 98 91 84 98 C70 102 56 102 46 100Z" fill="#5C3018"/>
+        <path d="M148 86 C168 82 184 87 198 94 C212 100 224 100 234 96
+                 C224 102 210 102 196 98 C182 91 166 86 148 86Z" fill="#5C3018"/>
+      </svg>` },
+
+    // ── surprised: both brows high and arched — כלפי מעלה ──
+    { id:'brow_surprised', label:'מופתע / כלפי מעלה', emotion:'מופתע',
+      face:`
+        <!-- high raised arched brows — clearly elevated -->
+        <path d="M46 106 C58 76 74 70 88 72 C102 70 118 76 132 104
+                 C116 86 102 82 88 84 C74 82 60 86 46 106Z" fill="#5C3018"/>
+        <path d="M148 104 C162 76 178 70 192 72 C206 70 222 76 234 106
+                 C222 86 208 82 192 84 C176 82 162 86 148 104Z" fill="#5C3018"/>`,
+      preview:`<svg viewBox="38 66 204 44" xmlns="http://www.w3.org/2000/svg">
+        <path d="M46 106 C58 76 74 70 88 72 C102 70 118 76 132 104
+                 C116 86 102 82 88 84 C74 82 60 86 46 106Z" fill="#5C3018"/>
+        <path d="M148 104 C162 76 178 70 192 72 C206 70 222 76 234 106
+                 C222 86 208 82 192 84 C176 82 162 86 148 104Z" fill="#5C3018"/>
+      </svg>` },
+
+    // ── thick: heavy bold brows, stern ──
+    { id:'brow_thick', label:'עבות', emotion:'רציני',
+      face:`
+        <path d="M42 102 C56 80 74 76 88 78 C102 76 118 80 134 98
+                 C118 90 102 87 88 89 C74 87 58 91 42 102Z"
+          fill="#2A1008" stroke="#1A0804" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M146 98 C162 80 178 76 192 78 C206 76 224 80 238 98
+                 C224 91 208 87 192 89 C176 87 162 90 146 98Z"
+          fill="#2A1008" stroke="#1A0804" stroke-width="2" stroke-linejoin="round"/>`,
+      preview:`<svg viewBox="36 72 208 34" xmlns="http://www.w3.org/2000/svg">
+        <path d="M42 102 C56 80 74 76 88 78 C102 76 118 80 134 98
+                 C118 90 102 87 88 89 C74 87 58 91 42 102Z"
+          fill="#2A1008" stroke="#1A0804" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M146 98 C162 80 178 76 192 78 C206 76 224 80 238 98
+                 C224 91 208 87 192 89 C176 87 162 90 146 98Z"
+          fill="#2A1008" stroke="#1A0804" stroke-width="2" stroke-linejoin="round"/>
+      </svg>` },
+
+    // ── thin: delicate arched brows, soft ──
+    { id:'brow_thin', label:'דקות', emotion:'עדין',
+      face:`
+        <path d="M54 96 C66 89 76 87 88 88 C100 87 112 89 128 94
+                 C114 92 100 91 88 92 C76 91 66 93 54 97Z" fill="#7A5030" opacity="0.85"/>
+        <path d="M152 94 C168 89 180 87 192 88 C204 87 214 89 226 94
+                 C214 93 204 91 192 92 C180 91 168 93 152 96Z" fill="#7A5030" opacity="0.85"/>`,
+      preview:`<svg viewBox="46 84 188 18" xmlns="http://www.w3.org/2000/svg">
+        <path d="M54 96 C66 89 76 87 88 88 C100 87 112 89 128 94
+                 C114 92 100 91 88 92 C76 91 66 93 54 97Z" fill="#7A5030" opacity="0.85"/>
+        <path d="M152 94 C168 89 180 87 192 88 C204 87 214 89 226 94
+                 C214 93 204 91 192 92 C180 91 168 93 152 96Z" fill="#7A5030" opacity="0.85"/>
+      </svg>` },
+  ],
+
+  // ══════════════════════════════════════════════════════
+  //  NOSE  —  realistic with nostrils, bridge, shadow
+  //  Center: x=140, y≈162–215
+  // ══════════════════════════════════════════════════════
+  nose: [
+    { id:'nose_simple', label:'פשוט', emotion:'ניטרלי',
+      face:`
+        <!-- bridge -->
+        <path d="M136 162 C134 172 130 182 124 194 Q130 202 140 205 Q150 202 156 194 C150 182 146 172 144 162"
+          fill="none" stroke="#C08060" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- nostrils -->
+        <ellipse cx="128" cy="200" rx="8" ry="5" fill="#C08060" opacity="0.55" transform="rotate(-15,128,200)"/>
+        <ellipse cx="152" cy="200" rx="8" ry="5" fill="#C08060" opacity="0.55" transform="rotate(15,152,200)"/>`,
+      preview:`<svg viewBox="108 156 64 56" xmlns="http://www.w3.org/2000/svg">
+        <path d="M136 162 C134 172 130 182 124 194 Q130 202 140 205 Q150 202 156 194 C150 182 146 172 144 162"
+          fill="none" stroke="#C08060" stroke-width="2.5" stroke-linecap="round"/>
+        <ellipse cx="128" cy="200" rx="8" ry="5" fill="#C08060" opacity="0.55" transform="rotate(-15,128,200)"/>
+        <ellipse cx="152" cy="200" rx="8" ry="5" fill="#C08060" opacity="0.55" transform="rotate(15,152,200)"/>
+      </svg>` },
+
+    { id:'nose_round', label:'עגול', emotion:'שמח',
+      face:`
+        <!-- soft round bulb nose -->
+        <path d="M136 165 C132 176 124 186 122 196 C120 205 130 212 140 212 C150 212 160 205 158 196 C156 186 148 176 144 165"
+          fill="#F0B090" stroke="#C08060" stroke-width="1.5"/>
+        <!-- nostrils -->
+        <ellipse cx="127" cy="202" rx="9"  ry="6" fill="#B06840" opacity="0.5" transform="rotate(-10,127,202)"/>
+        <ellipse cx="153" cy="202" rx="9"  ry="6" fill="#B06840" opacity="0.5" transform="rotate(10,153,202)"/>
+        <!-- highlight -->
+        <ellipse cx="138" cy="188" rx="5" ry="7" fill="white" opacity="0.3"/>`,
+      preview:`<svg viewBox="108 160 64 58" xmlns="http://www.w3.org/2000/svg">
+        <path d="M136 165 C132 176 124 186 122 196 C120 205 130 212 140 212 C150 212 160 205 158 196 C156 186 148 176 144 165"
+          fill="#F0B090" stroke="#C08060" stroke-width="1.5"/>
+        <ellipse cx="127" cy="202" rx="9" ry="6" fill="#B06840" opacity="0.5" transform="rotate(-10,127,202)"/>
+        <ellipse cx="153" cy="202" rx="9" ry="6" fill="#B06840" opacity="0.5" transform="rotate(10,153,202)"/>
+        <ellipse cx="138" cy="188" rx="5" ry="7" fill="white" opacity="0.3"/>
+      </svg>` },
+
+    { id:'nose_big', label:'גדול', emotion:'קומי',
+      face:`
+        <path d="M140 160 C136 172 124 182 114 196 C110 204 120 216 140 216 C160 216 170 204 166 196 C156 182 144 172 140 160Z"
+          fill="#F0A880" stroke="#B06040" stroke-width="2"/>
+        <!-- large nostrils -->
+        <ellipse cx="122" cy="206" rx="11" ry="7" fill="#904020" opacity="0.5" transform="rotate(-20,122,206)"/>
+        <ellipse cx="158" cy="206" rx="11" ry="7" fill="#904020" opacity="0.5" transform="rotate(20,158,206)"/>
+        <!-- shadow under bulb -->
+        <path d="M124 196 Q140 202 156 196" fill="none" stroke="#B06040" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+        <!-- highlight -->
+        <ellipse cx="136" cy="184" rx="6" ry="9" fill="white" opacity="0.25"/>`,
+      preview:`<svg viewBox="104 154 72 68" xmlns="http://www.w3.org/2000/svg">
+        <path d="M140 160 C136 172 124 182 114 196 C110 204 120 216 140 216 C160 216 170 204 166 196 C156 182 144 172 140 160Z"
+          fill="#F0A880" stroke="#B06040" stroke-width="2"/>
+        <ellipse cx="122" cy="206" rx="11" ry="7" fill="#904020" opacity="0.5" transform="rotate(-20,122,206)"/>
+        <ellipse cx="158" cy="206" rx="11" ry="7" fill="#904020" opacity="0.5" transform="rotate(20,158,206)"/>
+        <ellipse cx="136" cy="184" rx="6" ry="9" fill="white" opacity="0.25"/>
+      </svg>` },
+
+    { id:'nose_dot', label:'נקודה', emotion:'עדין',
+      face:`
+        <!-- tiny cute button nose -->
+        <ellipse cx="134" cy="204" rx="7" ry="5" fill="#C08868" opacity="0.7" transform="rotate(-12,134,204)"/>
+        <ellipse cx="146" cy="204" rx="7" ry="5" fill="#C08868" opacity="0.7" transform="rotate(12,146,204)"/>
+        <path d="M134 200 Q140 197 146 200" fill="none" stroke="#C08868" stroke-width="2" stroke-linecap="round"/>`,
+      preview:`<svg viewBox="118 192 44 20" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="134" cy="204" rx="7" ry="5" fill="#C08868" opacity="0.7" transform="rotate(-12,134,204)"/>
+        <ellipse cx="146" cy="204" rx="7" ry="5" fill="#C08868" opacity="0.7" transform="rotate(12,146,204)"/>
+        <path d="M134 200 Q140 197 146 200" fill="none" stroke="#C08868" stroke-width="2" stroke-linecap="round"/>
+      </svg>` },
+
+    { id:'nose_pointed', label:'מחודד', emotion:'עיוות',
+      face:`
+        <path d="M140 162 C138 172 128 184 118 208 Q128 218 140 214 Q152 218 162 208 C152 184 142 172 140 162Z"
+          fill="#EEA880" stroke="#AA6040" stroke-width="2"/>
+        <ellipse cx="125" cy="210" rx="9" ry="5" fill="#884020" opacity="0.45" transform="rotate(-20,125,210)"/>
+        <ellipse cx="155" cy="210" rx="9" ry="5" fill="#884020" opacity="0.45" transform="rotate(20,155,210)"/>`,
+      preview:`<svg viewBox="110 156 60 66" xmlns="http://www.w3.org/2000/svg">
+        <path d="M140 162 C138 172 128 184 118 208 Q128 218 140 214 Q152 218 162 208 C152 184 142 172 140 162Z"
+          fill="#EEA880" stroke="#AA6040" stroke-width="2"/>
+        <ellipse cx="125" cy="210" rx="9" ry="5" fill="#884020" opacity="0.45" transform="rotate(-20,125,210)"/>
+        <ellipse cx="155" cy="210" rx="9" ry="5" fill="#884020" opacity="0.45" transform="rotate(20,155,210)"/>
+      </svg>` },
+
+    // ── FUN NOSE OBJECTS ──
+    { id:'nose_clown', label:'אף ליצן', emotion:'שמח',
+      face:`
+        <circle cx="140" cy="196" r="22" fill="#FF2222" stroke="#CC0000" stroke-width="2.5"/>
+        <ellipse cx="132" cy="190" rx="7" ry="5" fill="white" opacity="0.25" transform="rotate(-20,132,190)"/>
+        <ellipse cx="148" cy="206" rx="5" ry="3" fill="#880000" opacity="0.3"/>`,
+      preview:`<svg viewBox="112 168 56 56" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="140" cy="196" r="22" fill="#FF2222" stroke="#CC0000" stroke-width="2.5"/>
+        <ellipse cx="132" cy="190" rx="7" ry="5" fill="white" opacity="0.25" transform="rotate(-20,132,190)"/>
+      </svg>` },
+
+    { id:'nose_pencil', label:'עיפרון', emotion:'רציני',
+      face:`
+        <!-- pencil lying horizontally across nose area -->
+        <!-- body -->
+        <rect x="92" y="194" width="88" height="10" rx="3" fill="#FFDD44" stroke="#AA8800" stroke-width="1.5"/>
+        <!-- eraser end (left) -->
+        <rect x="88" y="194" width="8" height="10" rx="2" fill="#FFB0B0" stroke="#AA8800" stroke-width="1.5"/>
+        <!-- metal ferrule -->
+        <rect x="96" y="194" width="6" height="10" fill="#C0C0C0" stroke="#888" stroke-width="1"/>
+        <!-- tip (right) -->
+        <polygon points="180,194 188,199 180,204" fill="#FFDD44" stroke="#AA8800" stroke-width="1"/>
+        <polygon points="182,196 188,199 182,202" fill="#F5C842"/>
+        <polygon points="184,197 188,199 184,201" fill="#D4A040"/>
+        <!-- wood/graphite tip -->
+        <polygon points="185,197.5 188,199 185,200.5" fill="#666"/>
+        <!-- pencil line detail -->
+        <line x1="96" y1="199" x2="180" y2="199" stroke="#CCAA00" stroke-width="0.8" opacity="0.5"/>`,
+      preview:`<svg viewBox="82 188 116 22" xmlns="http://www.w3.org/2000/svg">
+        <rect x="92" y="194" width="88" height="10" rx="3" fill="#FFDD44" stroke="#AA8800" stroke-width="1.5"/>
+        <rect x="88" y="194" width="8" height="10" rx="2" fill="#FFB0B0" stroke="#AA8800" stroke-width="1.5"/>
+        <rect x="96" y="194" width="6" height="10" fill="#C0C0C0" stroke="#888" stroke-width="1"/>
+        <polygon points="180,194 188,199 180,204" fill="#FFDD44" stroke="#AA8800" stroke-width="1"/>
+        <polygon points="185,197.5 188,199 185,200.5" fill="#666"/>
+      </svg>` },
+
+    { id:'nose_marker', label:'טוש', emotion:'שובב',
+      face:`
+        <!-- fat marker, tilted diagonally -->
+        <!-- cap -->
+        <rect x="112" y="158" width="16" height="38" rx="5" fill="#CC2222" stroke="#881111" stroke-width="2"
+              transform="rotate(15,120,177)"/>
+        <!-- body -->
+        <rect x="130" y="162" width="22" height="48" rx="6" fill="#EE3333" stroke="#AA1111" stroke-width="2"
+              transform="rotate(15,141,186)"/>
+        <!-- tip -->
+        <rect x="152" y="166" width="8" height="16" rx="3" fill="#222"
+              transform="rotate(15,156,174)"/>
+        <!-- label stripe -->
+        <rect x="132" y="175" width="22" height="7" fill="white" opacity="0.4"
+              transform="rotate(15,143,178.5)"/>`,
+      preview:`<svg viewBox="100 148 80 70" xmlns="http://www.w3.org/2000/svg">
+        <rect x="112" y="158" width="16" height="38" rx="5" fill="#CC2222" stroke="#881111" stroke-width="2"
+              transform="rotate(15,120,177)"/>
+        <rect x="130" y="162" width="22" height="48" rx="6" fill="#EE3333" stroke="#AA1111" stroke-width="2"
+              transform="rotate(15,141,186)"/>
+        <rect x="152" y="166" width="8" height="16" rx="3" fill="#222"
+              transform="rotate(15,156,174)"/>
+      </svg>` },
+
+    { id:'nose_deflated', label:'בלון מרוקן', emotion:'עצוב',
+      face:`
+        <!-- deflated balloon hanging limply -->
+        <!-- limp balloon body — wrinkled oval, drooping -->
+        <path d="M128 168 C122 172 116 180 118 192 C120 202 130 210 140 212
+                 C150 210 158 200 156 188 C154 178 148 170 140 168
+                 C136 166 132 166 128 168Z"
+          fill="#AA66CC" stroke="#7744AA" stroke-width="2"/>
+        <!-- wrinkle lines on limp balloon -->
+        <path d="M126 176 C128 180 130 186 130 192" fill="none" stroke="#7744AA" stroke-width="1.2" opacity="0.5"/>
+        <path d="M150 178 C148 183 147 188 148 194" fill="none" stroke="#7744AA" stroke-width="1.2" opacity="0.5"/>
+        <!-- knot at bottom -->
+        <ellipse cx="140" cy="213" rx="4" ry="3" fill="#7744AA"/>
+        <!-- string drooping -->
+        <path d="M140 216 C138 224 136 232 134 240" fill="none" stroke="#7744AA" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- highlight -->
+        <ellipse cx="132" cy="178" rx="5" ry="8" fill="white" opacity="0.2" transform="rotate(-10,132,178)"/>`,
+      preview:`<svg viewBox="108 158 64 88" xmlns="http://www.w3.org/2000/svg">
+        <path d="M128 168 C122 172 116 180 118 192 C120 202 130 210 140 212
+                 C150 210 158 200 156 188 C154 178 148 170 140 168
+                 C136 166 132 166 128 168Z"
+          fill="#AA66CC" stroke="#7744AA" stroke-width="2"/>
+        <path d="M126 176 C128 180 130 186 130 192" fill="none" stroke="#7744AA" stroke-width="1.2" opacity="0.5"/>
+        <ellipse cx="140" cy="213" rx="4" ry="3" fill="#7744AA"/>
+        <path d="M140 216 C138 224 136 232 134 240" fill="none" stroke="#7744AA" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>` },
+  ],
+  // ══════════════════════════════════════════════════════
+  //  MOUTH  —  realistic lips, clear curves, teeth
+  //  All use cubic bezier for natural lip shape
+  //  Lip center: x=140, line at y≈244, range y≈228–292
+  // ══════════════════════════════════════════════════════
+  mouth: [
+    // ── smile: gentle upward arc, both lips, light teeth ──
+    { id:'mouth_smile', label:'מחייך', emotion:'שמח',
+      face:`
+        <!-- mouth opening: gentle upward smile arc -->
+        <path d="M88 246 C100 246 120 268 140 270 C160 268 180 246 192 246" fill="#1A0808"/>
+        <!-- lower lip: full rounded shape following the smile -->
+        <path d="M88 246 C100 258 120 276 140 278 C160 276 180 258 192 246
+                 C178 250 158 260 140 262 C122 260 102 250 88 246Z" fill="#D4607A"/>
+        <!-- upper lip: cupid bow, sitting on the smile line -->
+        <path d="M88 246 C96 240 110 238 120 240 C128 236 134 234 140 235
+                 C146 234 152 236 160 240 C170 238 184 240 192 246
+                 C178 244 158 244 140 244 C122 244 102 244 88 246Z" fill="#C03A60"/>
+        <!-- teeth visible inside smile -->
+        <path d="M96 246 C110 256 128 264 140 265 C152 264 170 256 184 246
+                 C168 250 152 256 140 257 C128 256 112 250 96 246Z" fill="#F5F0EE"/>
+        <!-- tooth dividers -->
+        <line x1="120" y1="246" x2="118" y2="257" stroke="#DDD0D0" stroke-width="1"/>
+        <line x1="140" y1="246" x2="140" y2="258" stroke="#DDD0D0" stroke-width="1"/>
+        <line x1="160" y1="246" x2="162" y2="257" stroke="#DDD0D0" stroke-width="1"/>
+        <!-- cupid bow line -->
+        <path d="M116 240 C124 243 132 241 140 242 C148 241 156 243 164 240"
+          fill="none" stroke="#A02848" stroke-width="1.2" opacity="0.5" stroke-linecap="round"/>`,
+      preview:`<svg viewBox="76 228 128 58" xmlns="http://www.w3.org/2000/svg">
+        <path d="M88 246 C100 246 120 268 140 270 C160 268 180 246 192 246" fill="#1A0808"/>
+        <path d="M88 246 C100 258 120 276 140 278 C160 276 180 258 192 246
+                 C178 250 158 260 140 262 C122 260 102 250 88 246Z" fill="#D4607A"/>
+        <path d="M88 246 C96 240 110 238 120 240 C128 236 134 234 140 235
+                 C146 234 152 236 160 240 C170 238 184 240 192 246
+                 C178 244 158 244 140 244 C122 244 102 244 88 246Z" fill="#C03A60"/>
+        <path d="M96 246 C110 256 128 264 140 265 C152 264 170 256 184 246
+                 C168 250 152 256 140 257 C128 256 112 250 96 246Z" fill="#F5F0EE"/>
+        <line x1="120" y1="246" x2="118" y2="257" stroke="#DDD0D0" stroke-width="1"/>
+        <line x1="140" y1="246" x2="140" y2="258" stroke="#DDD0D0" stroke-width="1"/>
+        <line x1="160" y1="246" x2="162" y2="257" stroke="#DDD0D0" stroke-width="1"/>
+      </svg>` },
+
+    // ── sad: distinct downward curve, drooping corners ──
+    { id:'mouth_sad', label:'עצוב', emotion:'עצוב',
+      face:`
+        <!-- sad mouth — corners pull sharply downward -->
+        <!-- opening shape: inverted arc -->
+        <path d="M90 252 C102 252 118 238 140 236 C162 238 178 252 190 252" fill="#1A0808"/>
+        <!-- lower lip follows sad curve downward at center, up at corners -->
+        <path d="M90 252 C102 264 120 270 140 272 C160 270 178 264 190 252
+                 C176 256 160 262 140 264 C120 262 104 256 90 252Z" fill="#D4607A"/>
+        <!-- upper lip — cupid bow sits lower at center (sad droop) -->
+        <path d="M90 252 C98 246 110 244 120 246 C128 243 136 242 140 242
+                 C144 242 152 243 160 246 C170 244 182 246 190 252
+                 C176 250 160 250 140 250 C120 250 104 250 90 252Z" fill="#C03A60"/>
+        <!-- drooping corner accents -->
+        <path d="M90 252 C86 256 84 262 84 268" fill="none" stroke="#A02848" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M190 252 C194 256 196 262 196 268" fill="none" stroke="#A02848" stroke-width="2.5" stroke-linecap="round"/>`,
+      preview:`<svg viewBox="76 228 128 54" xmlns="http://www.w3.org/2000/svg">
+        <path d="M90 252 C102 252 118 238 140 236 C162 238 178 252 190 252" fill="#1A0808"/>
+        <path d="M90 252 C102 264 120 270 140 272 C160 270 178 264 190 252
+                 C176 256 160 262 140 264 C120 262 104 256 90 252Z" fill="#D4607A"/>
+        <path d="M90 252 C98 246 110 244 120 246 C128 243 136 242 140 242
+                 C144 242 152 243 160 246 C170 244 182 246 190 252
+                 C176 250 160 250 140 250 C120 250 104 250 90 252Z" fill="#C03A60"/>
+        <path d="M90 252 C86 256 84 262 84 268" fill="none" stroke="#A02848" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M190 252 C194 256 196 262 196 268" fill="none" stroke="#A02848" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>` },
+
+    // ── angry: flat tight line, teeth clenched ──
+    { id:'mouth_angry', label:'כועס', emotion:'כועס',
+      face:`
+        <!-- tight flat angry mouth with slight downward corners -->
+        <path d="M84 250 C104 248 124 246 140 246 C156 246 176 248 196 250" fill="#1A0808"/>
+        <path d="M84 250 C104 254 124 256 140 257 C156 256 176 254 196 250
+                 C176 252 156 253 140 253 C124 253 104 252 84 250Z" fill="#D4607A"/>
+        <path d="M84 250 C96 246 116 244 140 244 C164 244 184 246 196 250
+                 C176 248 156 248 140 248 C124 248 104 248 84 250Z" fill="#B02040"/>
+        <!-- clenched teeth showing — tight row -->
+        <path d="M92 250 C108 252 126 254 140 254 C154 254 172 252 188 250
+                 C172 251 154 252 140 252 C126 252 108 251 92 250Z" fill="#EEE8E0" opacity="0.85"/>
+        <line x1="116" y1="250" x2="116" y2="253" stroke="#DDD0C8" stroke-width="1"/>
+        <line x1="128" y1="250" x2="128" y2="253" stroke="#DDD0C8" stroke-width="1"/>
+        <line x1="140" y1="250" x2="140" y2="253" stroke="#DDD0C8" stroke-width="1"/>
+        <line x1="152" y1="250" x2="152" y2="253" stroke="#DDD0C8" stroke-width="1"/>
+        <line x1="164" y1="250" x2="164" y2="253" stroke="#DDD0C8" stroke-width="1"/>
+        <!-- corner tension creases -->
+        <path d="M84 250 C80 248 78 244 80 240" fill="none" stroke="#901830" stroke-width="2" stroke-linecap="round"/>
+        <path d="M196 250 C200 248 202 244 200 240" fill="none" stroke="#901830" stroke-width="2" stroke-linecap="round"/>`,
+      preview:`<svg viewBox="72 232 136 30" xmlns="http://www.w3.org/2000/svg">
+        <path d="M84 250 C104 248 124 246 140 246 C156 246 176 248 196 250" fill="#1A0808"/>
+        <path d="M84 250 C104 254 124 256 140 257 C156 256 176 254 196 250
+                 C176 252 156 253 140 253 C124 253 104 252 84 250Z" fill="#D4607A"/>
+        <path d="M84 250 C96 246 116 244 140 244 C164 244 184 246 196 250
+                 C176 248 156 248 140 248 C124 248 104 248 84 250Z" fill="#B02040"/>
+        <path d="M92 250 C108 252 126 254 140 254 C154 254 172 252 188 250
+                 C172 251 154 252 140 252 C126 252 108 251 92 250Z" fill="#EEE8E0" opacity="0.85"/>
+        <path d="M84 250 C80 248 78 244 80 240" fill="none" stroke="#901830" stroke-width="2" stroke-linecap="round"/>
+        <path d="M196 250 C200 248 202 244 200 240" fill="none" stroke="#901830" stroke-width="2" stroke-linecap="round"/>
+      </svg>` },
+
+    // ── surprised: wide open oval, visible upper teeth + tongue ──
+    { id:'mouth_surprised', label:'מופתע', emotion:'מופתע',
+      face:`
+        <!-- surprised open mouth — taller oval, dropped jaw -->
+        <!-- dark interior -->
+        <ellipse cx="140" cy="258" rx="38" ry="30" fill="#220A0A"/>
+        <!-- upper lip — arched up, cupid bow -->
+        <path d="M102 258 C108 238 124 232 140 234 C156 232 172 238 178 258
+                 C168 250 154 246 140 248 C126 246 112 250 102 258Z" fill="#C03A60"/>
+        <!-- lower lip — full, round, dropped -->
+        <path d="M102 258 C108 276 124 286 140 288 C156 286 172 276 178 258
+                 C168 268 154 276 140 278 C126 276 112 268 102 258Z" fill="#D4607A"/>
+        <!-- inner dark -->
+        <ellipse cx="140" cy="260" rx="31" ry="23" fill="#2A0808"/>
+        <!-- upper teeth row — clearly visible -->
+        <path d="M110 252 C120 248 130 246 140 247 C150 246 160 248 170 252"
+          fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
+        <!-- tooth dividers on upper row -->
+        <line x1="122" y1="249" x2="122" y2="253" stroke="#DDD0D0" stroke-width="1.5"/>
+        <line x1="140" y1="248" x2="140" y2="253" stroke="#DDD0D0" stroke-width="1.5"/>
+        <line x1="158" y1="249" x2="158" y2="253" stroke="#DDD0D0" stroke-width="1.5"/>
+        <!-- tongue resting at bottom -->
+        <ellipse cx="140" cy="274" rx="20" ry="10" fill="#D03060" opacity="0.7"/>
+        <line x1="140" y1="265" x2="140" y2="280" stroke="#B02040" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>`,
+      preview:`<svg viewBox="96 226 88 68" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="140" cy="258" rx="38" ry="30" fill="#220A0A"/>
+        <path d="M102 258 C108 238 124 232 140 234 C156 232 172 238 178 258
+                 C168 250 154 246 140 248 C126 246 112 250 102 258Z" fill="#C03A60"/>
+        <path d="M102 258 C108 276 124 286 140 288 C156 286 172 276 178 258
+                 C168 268 154 276 140 278 C126 276 112 268 102 258Z" fill="#D4607A"/>
+        <ellipse cx="140" cy="260" rx="31" ry="23" fill="#2A0808"/>
+        <path d="M110 252 C120 248 130 246 140 247 C150 246 160 248 170 252"
+          fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
+        <ellipse cx="140" cy="274" rx="20" ry="10" fill="#D03060" opacity="0.7"/>
+      </svg>` },
+
+    // ── neutral: flat closed lips ──
+    { id:'mouth_neutral', label:'ניטרלי', emotion:'ניטרלי',
+      face:`
+        <!-- flat straight lips, slight natural thickness -->
+        <path d="M96 248 C116 246 128 245 140 245 C152 245 164 246 184 248
+                 C164 250 152 251 140 251 C128 251 116 250 96 248Z" fill="#C03A60"/>
+        <path d="M96 248 C116 250 128 252 140 252 C152 252 164 250 184 248
+                 C164 252 152 254 140 254 C128 254 116 252 96 248Z" fill="#D4607A"/>
+        <path d="M96 248 C128 248 140 248 184 248" fill="none" stroke="#A02848" stroke-width="1" opacity="0.6"/>`,
+      preview:`<svg viewBox="84 238 112 22" xmlns="http://www.w3.org/2000/svg">
+        <path d="M96 248 C116 246 128 245 140 245 C152 245 164 246 184 248
+                 C164 250 152 251 140 251 C128 251 116 250 96 248Z" fill="#C03A60"/>
+        <path d="M96 248 C116 250 128 252 140 252 C152 252 164 250 184 248
+                 C164 252 152 254 140 254 C128 254 116 252 96 248Z" fill="#D4607A"/>
+        <path d="M96 248 C128 248 140 248 184 248" fill="none" stroke="#A02848" stroke-width="1" opacity="0.6"/>
+      </svg>` },
+
+    // ── big grin: very wide, lots of teeth, cheek creases ──
+    { id:'mouth_grin', label:'חיוך גדול', emotion:'מאושר',
+      face:`
+        <!-- big wide grin — wider and more open than smile -->
+        <path d="M72 240 C88 240 114 272 140 276 C166 272 192 240 208 240" fill="#1A0808"/>
+        <!-- lower lip: wide wide arc -->
+        <path d="M72 240 C88 256 114 280 140 284 C166 280 192 256 208 240
+                 C192 248 168 264 140 268 C112 264 88 248 72 240Z" fill="#D4607A"/>
+        <!-- upper lip: wide cupid bow -->
+        <path d="M72 240 C84 230 104 226 120 230 C130 224 136 222 140 222
+                 C144 222 150 224 160 230 C176 226 196 230 208 240
+                 C192 238 168 238 140 238 C112 238 88 238 72 240Z" fill="#C03A60"/>
+        <!-- wide teeth — 6 visible -->
+        <path d="M80 240 C100 260 120 274 140 276 C160 274 180 260 200 240
+                 C184 248 164 260 140 263 C116 260 96 248 80 240Z" fill="#F5F0EE"/>
+        <!-- 5 tooth dividers -->
+        <line x1="104" y1="242" x2="100" y2="258" stroke="#DDD0C8" stroke-width="1.2"/>
+        <line x1="120" y1="241" x2="118" y2="260" stroke="#DDD0C8" stroke-width="1.2"/>
+        <line x1="140" y1="240" x2="140" y2="264" stroke="#DDD0C8" stroke-width="1.2"/>
+        <line x1="160" y1="241" x2="162" y2="260" stroke="#DDD0C8" stroke-width="1.2"/>
+        <line x1="176" y1="242" x2="180" y2="258" stroke="#DDD0C8" stroke-width="1.2"/>
+        <!-- cheek crease lines -->
+        <path d="M72 240 C66 244 64 252 66 260" fill="none" stroke="#C06080" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+        <path d="M208 240 C214 244 216 252 214 260" fill="none" stroke="#C06080" stroke-width="2" stroke-linecap="round" opacity="0.5"/>`,
+      preview:`<svg viewBox="58 216 164 76" xmlns="http://www.w3.org/2000/svg">
+        <path d="M72 240 C88 240 114 272 140 276 C166 272 192 240 208 240" fill="#1A0808"/>
+        <path d="M72 240 C88 256 114 280 140 284 C166 280 192 256 208 240
+                 C192 248 168 264 140 268 C112 264 88 248 72 240Z" fill="#D4607A"/>
+        <path d="M72 240 C84 230 104 226 120 230 C130 224 136 222 140 222
+                 C144 222 150 224 160 230 C176 226 196 230 208 240
+                 C192 238 168 238 140 238 C112 238 88 238 72 240Z" fill="#C03A60"/>
+        <path d="M80 240 C100 260 120 274 140 276 C160 274 180 260 200 240
+                 C184 248 164 260 140 263 C116 260 96 248 80 240Z" fill="#F5F0EE"/>
+        <line x1="104" y1="242" x2="100" y2="258" stroke="#DDD0C8" stroke-width="1.2"/>
+        <line x1="120" y1="241" x2="118" y2="260" stroke="#DDD0C8" stroke-width="1.2"/>
+        <line x1="140" y1="240" x2="140" y2="264" stroke="#DDD0C8" stroke-width="1.2"/>
+        <line x1="160" y1="241" x2="162" y2="260" stroke="#DDD0C8" stroke-width="1.2"/>
+        <line x1="176" y1="242" x2="180" y2="258" stroke="#DDD0C8" stroke-width="1.2"/>
+      </svg>` },
+
+    // ── tongue: open smile + protruding tongue ──
+    { id:'mouth_tongue', label:'שובב', emotion:'שובב',
+      face:`
+        <!-- open playful mouth with tongue out -->
+        <path d="M84 242 C100 242 120 264 140 267 C160 264 180 242 196 242" fill="#1A0808"/>
+        <!-- lower lip -->
+        <path d="M84 242 C100 254 120 270 140 273 C160 270 180 254 196 242
+                 C180 248 162 258 140 261 C118 258 100 248 84 242Z" fill="#D4607A"/>
+        <!-- upper lip -->
+        <path d="M84 242 C96 234 112 232 124 234 C130 230 136 228 140 229
+                 C144 228 150 230 156 234 C168 232 184 234 196 242
+                 C180 240 162 240 140 240 C118 240 100 240 84 242Z" fill="#C03A60"/>
+        <!-- teeth row -->
+        <path d="M92 242 C108 252 124 260 140 262 C156 260 172 252 188 242
+                 C172 246 156 252 140 254 C124 252 108 246 92 242Z" fill="#F5F0EE"/>
+        <line x1="116" y1="243" x2="114" y2="254" stroke="#DDD0C8" stroke-width="1"/>
+        <line x1="140" y1="242" x2="140" y2="255" stroke="#DDD0C8" stroke-width="1"/>
+        <line x1="164" y1="243" x2="166" y2="254" stroke="#DDD0C8" stroke-width="1"/>
+        <!-- tongue — wide and protruding, rounded tip -->
+        <path d="M120 258 C120 272 128 294 140 296 C152 294 160 272 160 258
+                 C155 264 148 272 140 274 C132 272 125 264 120 258Z" fill="#E05070"/>
+        <!-- tongue center groove -->
+        <line x1="140" y1="260" x2="140" y2="290" stroke="#C03050" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+        <!-- tongue highlight -->
+        <ellipse cx="133" cy="270" rx="5" ry="8" fill="white" opacity="0.15"/>`,
+      preview:`<svg viewBox="72 224 136 78" xmlns="http://www.w3.org/2000/svg">
+        <path d="M84 242 C100 242 120 264 140 267 C160 264 180 242 196 242" fill="#1A0808"/>
+        <path d="M84 242 C100 254 120 270 140 273 C160 270 180 254 196 242
+                 C180 248 162 258 140 261 C118 258 100 248 84 242Z" fill="#D4607A"/>
+        <path d="M84 242 C96 234 112 232 124 234 C130 230 136 228 140 229
+                 C144 228 150 230 156 234 C168 232 184 234 196 242
+                 C180 240 162 240 140 240 C118 240 100 240 84 242Z" fill="#C03A60"/>
+        <path d="M92 242 C108 252 124 260 140 262 C156 260 172 252 188 242
+                 C172 246 156 252 140 254 C124 252 108 246 92 242Z" fill="#F5F0EE"/>
+        <path d="M120 258 C120 272 128 294 140 296 C152 294 160 272 160 258
+                 C155 264 148 272 140 274 C132 272 125 264 120 258Z" fill="#E05070"/>
+        <line x1="140" y1="260" x2="140" y2="290" stroke="#C03050" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      </svg>` },
+
+    // ── FUN MOUTH OBJECTS ──
+    { id:'mouth_balloon', label:'בלון (חוט)', emotion:'שמח',
+      face:`
+        <!-- balloon floating above, string held in mouth -->
+        <!-- balloon body — round inflated -->
+        <circle cx="140" cy="180" r="36" fill="#FF4488" stroke="#CC2266" stroke-width="2.5"/>
+        <!-- balloon shine -->
+        <ellipse cx="126" cy="166" rx="10" ry="14" fill="white" opacity="0.22" transform="rotate(-15,126,166)"/>
+        <!-- balloon knot -->
+        <ellipse cx="140" cy="217" rx="5" ry="4" fill="#CC2266"/>
+        <!-- string going down into mouth area -->
+        <path d="M140 221 C138 228 136 236 136 244 C136 248 138 250 140 250"
+          fill="none" stroke="#CC2266" stroke-width="2" stroke-linecap="round"/>
+        <!-- lips holding string -->
+        <path d="M120 250 C128 247 134 246 140 246 C146 246 152 247 160 250
+                 C152 252 146 253 140 253 C134 253 128 252 120 250Z" fill="#C03A60"/>
+        <path d="M120 250 C128 253 134 255 140 256 C146 255 152 253 160 250
+                 C152 254 146 256 140 257 C134 256 128 254 120 250Z" fill="#D4607A"/>`,
+      preview:`<svg viewBox="96 140 88 126" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="140" cy="180" r="36" fill="#FF4488" stroke="#CC2266" stroke-width="2.5"/>
+        <ellipse cx="126" cy="166" rx="10" ry="14" fill="white" opacity="0.22" transform="rotate(-15,126,166)"/>
+        <ellipse cx="140" cy="217" rx="5" ry="4" fill="#CC2266"/>
+        <path d="M140 221 C138 228 136 236 136 244 C136 248 138 250 140 250"
+          fill="none" stroke="#CC2266" stroke-width="2" stroke-linecap="round"/>
+        <path d="M120 250 C128 247 134 246 140 246 C146 246 152 247 160 250
+                 C152 252 146 253 140 253 C134 253 128 252 120 250Z" fill="#C03A60"/>
+        <path d="M120 250 C128 253 134 255 140 256 C146 255 152 253 160 250
+                 C152 254 146 256 140 257 C134 256 128 254 120 250Z" fill="#D4607A"/>
+      </svg>` },
+
+    { id:'mouth_necklace', label:'שרשרת', emotion:'עדין',
+      face:`
+        <!-- pearl necklace draping across lower face -->
+        <!-- chain arc: 9 beads along a curve -->
+        <circle cx="84"  cy="254" r="5" fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="96"  cy="263" r="5" fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="109" cy="269" r="5.5" fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="124" cy="273" r="5.5" fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="140" cy="275" r="6"   fill="#F5EEDD" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="156" cy="273" r="5.5" fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="171" cy="269" r="5.5" fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="184" cy="263" r="5"   fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="196" cy="254" r="5"   fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <!-- connecting thread -->
+        <path d="M84 254 C96 260 109 266 124 271 C132 273 136 274 140 275
+                 C144 274 148 273 156 271 C171 266 184 260 196 254"
+          fill="none" stroke="#C8B090" stroke-width="1" opacity="0.6"/>
+        <!-- center pendant -->
+        <polygon points="140,282 136,290 140,288 144,290" fill="#E8C860" stroke="#C8A840" stroke-width="1"/>
+        <circle cx="140" cy="281" r="4" fill="#E8C860" stroke="#C8A840" stroke-width="1.5"/>
+        <circle cx="140" cy="281" r="2" fill="#FFE080"/>`,
+      preview:`<svg viewBox="72 244 136 54" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="84"  cy="254" r="5" fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="96"  cy="263" r="5" fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="109" cy="269" r="5.5" fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="124" cy="273" r="5.5" fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="140" cy="275" r="6"   fill="#F5EEDD" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="156" cy="273" r="5.5" fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="171" cy="269" r="5.5" fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="184" cy="263" r="5"   fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <circle cx="196" cy="254" r="5"   fill="#F8F0E0" stroke="#C8B090" stroke-width="1.5"/>
+        <polygon points="140,282 136,290 140,288 144,290" fill="#E8C860" stroke="#C8A840" stroke-width="1"/>
+        <circle cx="140" cy="281" r="4" fill="#E8C860" stroke="#C8A840" stroke-width="1.5"/>
+      </svg>` },
+
+    { id:'mouth_zipper', label:'רוכסן', emotion:'ניטרלי',
+      face:`
+        <!-- zipper across mouth -->
+        <!-- zipper tape top -->
+        <rect x="78" y="242" width="124" height="7" rx="3" fill="#888" stroke="#666" stroke-width="1"/>
+        <!-- zipper tape bottom -->
+        <rect x="78" y="253" width="124" height="7" rx="3" fill="#888" stroke="#666" stroke-width="1"/>
+        <!-- zipper teeth — alternating left/right -->
+        <rect x="90"  y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="100" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="110" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="120" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="130" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="140" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="150" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="160" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="170" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <!-- zipper pull -->
+        <rect x="78" y="243" width="14" height="16" rx="4" fill="#CC9900" stroke="#AA7700" stroke-width="2"/>
+        <rect x="82" y="248" width="6" height="6" rx="2" fill="#FFCC00"/>`,
+      preview:`<svg viewBox="70 236 140 32" xmlns="http://www.w3.org/2000/svg">
+        <rect x="78" y="242" width="124" height="7" rx="3" fill="#888" stroke="#666" stroke-width="1"/>
+        <rect x="78" y="253" width="124" height="7" rx="3" fill="#888" stroke="#666" stroke-width="1"/>
+        <rect x="90"  y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="100" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="110" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="120" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="130" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="140" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="150" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="160" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="170" y="245" width="6" height="12" rx="1.5" fill="#DDD" stroke="#999" stroke-width="0.8"/>
+        <rect x="78" y="243" width="14" height="16" rx="4" fill="#CC9900" stroke="#AA7700" stroke-width="2"/>
+        <rect x="82" y="248" width="6" height="6" rx="2" fill="#FFCC00"/>
+      </svg>` },
+  ],
+  // ── EARS ──────────────────────────────────────────────────────
+  // Ear L: centered ~(18, 170), Ear R: centered ~(262, 170)
+  ears: [
+    { id:'ears_normal', label:'רגיל', emotion:'ניטרלי',
+      lc: `<ellipse cx="18" cy="170" rx="18" ry="28" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>
+           <ellipse cx="22" cy="170" rx="9"  ry="18" fill="#F5BC82" opacity="0.5"/>`,
+      rc: `<ellipse cx="262" cy="170" rx="18" ry="28" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>
+           <ellipse cx="258" cy="170" rx="9"  ry="18" fill="#F5BC82" opacity="0.5"/>`,
+      preview:`<svg viewBox="0 142 280 56" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="18"  cy="170" rx="18" ry="28" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>
+        <ellipse cx="262" cy="170" rx="18" ry="28" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/></svg>` },
+
+    { id:'ears_pointy', label:'מחודד', emotion:'אלפי',
+      lc: `<polygon points="4,200 34,200 34,130" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>`,
+      rc: `<polygon points="246,130 246,200 276,200" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>`,
+      preview:`<svg viewBox="0 126 280 78" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="4,200 34,200 34,130"    fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>
+        <polygon points="246,130 246,200 276,200" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/></svg>` },
+
+    { id:'ears_big', label:'גדולות', emotion:'קומי',
+      lc: `<ellipse cx="14" cy="170" rx="22" ry="36" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>
+           <ellipse cx="18" cy="170" rx="12" ry="24" fill="#F5BC82" opacity="0.45"/>`,
+      rc: `<ellipse cx="266" cy="170" rx="22" ry="36" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>
+           <ellipse cx="262" cy="170" rx="12" ry="24" fill="#F5BC82" opacity="0.45"/>`,
+      preview:`<svg viewBox="0 130 280 80" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="14"  cy="170" rx="22" ry="36" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>
+        <ellipse cx="266" cy="170" rx="22" ry="36" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/></svg>` },
+
+    { id:'ears_small', label:'קטנות', emotion:'עדין',
+      lc: `<ellipse cx="18" cy="170" rx="13" ry="18" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>`,
+      rc: `<ellipse cx="262" cy="170" rx="13" ry="18" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>`,
+      preview:`<svg viewBox="0 148 280 44" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="18"  cy="170" rx="13" ry="18" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>
+        <ellipse cx="262" cy="170" rx="13" ry="18" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/></svg>` },
+
+    { id:'ears_round', label:'עגולות', emotion:'חמוד',
+      lc: `<circle cx="16" cy="170" r="20" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>
+           <circle cx="19" cy="170" r="11" fill="#F5BC82" opacity="0.45"/>`,
+      rc: `<circle cx="264" cy="170" r="20" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>
+           <circle cx="261" cy="170" r="11" fill="#F5BC82" opacity="0.45"/>`,
+      preview:`<svg viewBox="0 148 280 44" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16"  cy="170" r="20" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/>
+        <circle cx="264" cy="170" r="20" fill="#FDDBB4" stroke="#3D2C1E" stroke-width="3"/></svg>` },
+  ],
+
+  // ── ACCESSORIES ───────────────────────────────────────────────
+  accessories: [
+    // HATS
+    { id:'hat_top', label:'צילינדר', slot:'hat',
+      face:`
+        <rect x="90" y="8" width="100" height="54" rx="6" fill="#2C1A0E" stroke="#111" stroke-width="2.5"/>
+        <rect x="66" y="58" width="148" height="15" rx="8" fill="#2C1A0E" stroke="#111" stroke-width="2.5"/>
+        <rect x="98" y="34" width="84" height="7" rx="3.5" fill="#8B5E3C" opacity="0.55"/>`,
+      preview:`<svg viewBox="62 4 156 74" xmlns="http://www.w3.org/2000/svg">
+        <rect x="90" y="8" width="100" height="54" rx="6" fill="#2C1A0E" stroke="#111" stroke-width="2.5"/>
+        <rect x="66" y="58" width="148" height="15" rx="8" fill="#2C1A0E" stroke="#111" stroke-width="2.5"/>
+        <rect x="98" y="34" width="84" height="7" rx="3.5" fill="#8B5E3C" opacity="0.55"/></svg>` },
+
+    { id:'hat_baseball', label:'כובע בייסבול', slot:'hat',
+      face:`
+        <ellipse cx="140" cy="48" rx="78" ry="24" fill="#D92B2B" stroke="#111" stroke-width="2.5"/>
+        <path d="M62 48 Q62 16 140 16 Q218 16 218 48" fill="#D92B2B" stroke="#111" stroke-width="2.5"/>
+        <ellipse cx="140" cy="48" rx="78" ry="10" fill="#B52020" opacity="0.45"/>
+        <ellipse cx="208" cy="54" rx="28" ry="8" fill="#B52020" stroke="#111" stroke-width="2"/>
+        <circle cx="140" cy="22" r="6" fill="#B52020" stroke="#111" stroke-width="1.5"/>`,
+      preview:`<svg viewBox="58 12 164 50" xmlns="http://www.w3.org/2000/svg">
+        <path d="M62 48 Q62 16 140 16 Q218 16 218 48" fill="#D92B2B" stroke="#111" stroke-width="2.5"/>
+        <ellipse cx="140" cy="48" rx="78" ry="24" fill="#D92B2B" stroke="#111" stroke-width="2.5"/>
+        <ellipse cx="208" cy="54" rx="28" ry="8" fill="#B52020" stroke="#111" stroke-width="2"/>
+        <circle cx="140" cy="22" r="6" fill="#B52020" stroke="#111" stroke-width="1.5"/></svg>` },
+
+    { id:'hat_crown', label:'כתר', slot:'hat',
+      face:`
+        <polygon points="82,60 82,20 108,40 140,6 172,40 198,20 198,60"
+          fill="#FFD700" stroke="#B8860B" stroke-width="2.5" stroke-linejoin="round"/>
+        <rect x="82" y="56" width="116" height="13" rx="5" fill="#FFD700" stroke="#B8860B" stroke-width="2"/>
+        <circle cx="140" cy="16" r="7" fill="#FF4444" stroke="#B8860B" stroke-width="1.5"/>
+        <circle cx="108" cy="40" r="5" fill="#44AAFF" stroke="#B8860B" stroke-width="1.5"/>
+        <circle cx="172" cy="40" r="5" fill="#44FF88" stroke="#B8860B" stroke-width="1.5"/>`,
+      preview:`<svg viewBox="76 2 128 72" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="82,60 82,20 108,40 140,6 172,40 198,20 198,60"
+          fill="#FFD700" stroke="#B8860B" stroke-width="2.5" stroke-linejoin="round"/>
+        <rect x="82" y="56" width="116" height="13" rx="5" fill="#FFD700" stroke="#B8860B" stroke-width="2"/>
+        <circle cx="140" cy="16" r="7" fill="#FF4444" stroke="#B8860B" stroke-width="1.5"/>
+        <circle cx="108" cy="40" r="5" fill="#44AAFF" stroke="#B8860B" stroke-width="1.5"/>
+        <circle cx="172" cy="40" r="5" fill="#44FF88" stroke="#B8860B" stroke-width="1.5"/></svg>` },
+
+    { id:'hat_beanie', label:'כובע צמר', slot:'hat',
+      face:`
+        <path d="M56 50 Q56 8 140 8 Q224 8 224 50" fill="#5B8DD9" stroke="#2C4A8C" stroke-width="2.5"/>
+        <ellipse cx="140" cy="50" rx="84" ry="17" fill="#5B8DD9" stroke="#2C4A8C" stroke-width="2.5"/>
+        <path d="M56 50 Q74 34 92 50 Q110 34 128 50 Q146 34 164 50 Q182 34 200 50 Q218 34 224 50"
+          fill="none" stroke="#7AAAF0" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="140" cy="10" r="12" fill="#5B8DD9" stroke="#2C4A8C" stroke-width="2"/>`,
+      preview:`<svg viewBox="48 4 184 62" xmlns="http://www.w3.org/2000/svg">
+        <path d="M56 50 Q56 8 140 8 Q224 8 224 50" fill="#5B8DD9" stroke="#2C4A8C" stroke-width="2.5"/>
+        <ellipse cx="140" cy="50" rx="84" ry="17" fill="#5B8DD9" stroke="#2C4A8C" stroke-width="2.5"/>
+        <path d="M56 50 Q74 34 92 50 Q110 34 128 50 Q146 34 164 50 Q182 34 200 50 Q218 34 224 50"
+          fill="none" stroke="#7AAAF0" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="140" cy="10" r="12" fill="#5B8DD9" stroke="#2C4A8C" stroke-width="2"/></svg>` },
+
+    // GLASSES
+    { id:'glasses_round', label:'משקפיים עגולות', slot:'glasses',
+      face:`
+        <circle cx="88"  cy="126" r="27" fill="#B8DEFF" opacity="0.22" stroke="#3D2C1E" stroke-width="3.5"/>
+        <circle cx="192" cy="126" r="27" fill="#B8DEFF" opacity="0.22" stroke="#3D2C1E" stroke-width="3.5"/>
+        <line x1="115" y1="126" x2="165" y2="126" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="24"  y1="120" x2="61"  y2="120" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="219" y1="120" x2="256" y2="120" stroke="#3D2C1E" stroke-width="3"/>`,
+      preview:`<svg viewBox="20 94 240 66" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="88"  cy="126" r="27" fill="#B8DEFF" opacity="0.3" stroke="#3D2C1E" stroke-width="3.5"/>
+        <circle cx="192" cy="126" r="27" fill="#B8DEFF" opacity="0.3" stroke="#3D2C1E" stroke-width="3.5"/>
+        <line x1="115" y1="126" x2="165" y2="126" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="24"  y1="120" x2="61"  y2="120" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="219" y1="120" x2="256" y2="120" stroke="#3D2C1E" stroke-width="3"/></svg>` },
+
+    { id:'glasses_square', label:'משקפיים מרובעות', slot:'glasses',
+      face:`
+        <rect x="62"  y="108" width="52" height="38" rx="8" fill="#B8DEFF" opacity="0.22" stroke="#3D2C1E" stroke-width="3.5"/>
+        <rect x="166" y="108" width="52" height="38" rx="8" fill="#B8DEFF" opacity="0.22" stroke="#3D2C1E" stroke-width="3.5"/>
+        <line x1="114" y1="127" x2="166" y2="127" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="24"  y1="118" x2="62"  y2="118" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="218" y1="118" x2="256" y2="118" stroke="#3D2C1E" stroke-width="3"/>`,
+      preview:`<svg viewBox="20 104 240 48" xmlns="http://www.w3.org/2000/svg">
+        <rect x="62"  y="108" width="52" height="38" rx="8" fill="#B8DEFF" opacity="0.3" stroke="#3D2C1E" stroke-width="3.5"/>
+        <rect x="166" y="108" width="52" height="38" rx="8" fill="#B8DEFF" opacity="0.3" stroke="#3D2C1E" stroke-width="3.5"/>
+        <line x1="114" y1="127" x2="166" y2="127" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="24"  y1="118" x2="62"  y2="118" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="218" y1="118" x2="256" y2="118" stroke="#3D2C1E" stroke-width="3"/></svg>` },
+
+    { id:'glasses_sun', label:'משקפי שמש', slot:'glasses',
+      face:`
+        <circle cx="88"  cy="126" r="27" fill="#111" opacity="0.82" stroke="#3D2C1E" stroke-width="3"/>
+        <circle cx="192" cy="126" r="27" fill="#111" opacity="0.82" stroke="#3D2C1E" stroke-width="3"/>
+        <circle cx="80"  cy="118" r="7"  fill="white" opacity="0.10"/>
+        <circle cx="184" cy="118" r="7"  fill="white" opacity="0.10"/>
+        <line x1="115" y1="122" x2="165" y2="122" stroke="#3D2C1E" stroke-width="4"/>
+        <line x1="24"  y1="116" x2="61"  y2="116" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="219" y1="116" x2="256" y2="116" stroke="#3D2C1E" stroke-width="3"/>`,
+      preview:`<svg viewBox="20 94 240 66" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="88"  cy="126" r="27" fill="#111" opacity="0.82" stroke="#3D2C1E" stroke-width="3"/>
+        <circle cx="192" cy="126" r="27" fill="#111" opacity="0.82" stroke="#3D2C1E" stroke-width="3"/>
+        <circle cx="80"  cy="118" r="7"  fill="white" opacity="0.10"/>
+        <circle cx="184" cy="118" r="7"  fill="white" opacity="0.10"/>
+        <line x1="115" y1="122" x2="165" y2="122" stroke="#3D2C1E" stroke-width="4"/>
+        <line x1="24"  y1="116" x2="61"  y2="116" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="219" y1="116" x2="256" y2="116" stroke="#3D2C1E" stroke-width="3"/></svg>` },
+
+    { id:'glasses_heart', label:'משקפי לב', slot:'glasses',
+      face:`
+        <path d="M88 120 C88 110 72 106 68 116 C64 126 88 142 88 142 C88 142 112 126 108 116 C104 106 88 110 88 120Z"
+          fill="#FF6B8A" opacity="0.78" stroke="#3D2C1E" stroke-width="2.5"/>
+        <path d="M192 120 C192 110 176 106 172 116 C168 126 192 142 192 142 C192 142 216 126 212 116 C208 106 192 110 192 120Z"
+          fill="#FF6B8A" opacity="0.78" stroke="#3D2C1E" stroke-width="2.5"/>
+        <line x1="116" y1="124" x2="164" y2="124" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="24"  y1="118" x2="68"  y2="118" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="212" y1="118" x2="256" y2="118" stroke="#3D2C1E" stroke-width="3"/>`,
+      preview:`<svg viewBox="20 100 240 48" xmlns="http://www.w3.org/2000/svg">
+        <path d="M88 120 C88 110 72 106 68 116 C64 126 88 142 88 142 C88 142 112 126 108 116 C104 106 88 110 88 120Z"
+          fill="#FF6B8A" opacity="0.85" stroke="#3D2C1E" stroke-width="2.5"/>
+        <path d="M192 120 C192 110 176 106 172 116 C168 126 192 142 192 142 C192 142 216 126 212 116 C208 106 192 110 192 120Z"
+          fill="#FF6B8A" opacity="0.85" stroke="#3D2C1E" stroke-width="2.5"/>
+        <line x1="116" y1="124" x2="164" y2="124" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="24"  y1="118" x2="68"  y2="118" stroke="#3D2C1E" stroke-width="3"/>
+        <line x1="212" y1="118" x2="256" y2="118" stroke="#3D2C1E" stroke-width="3"/></svg>` },
+
+    // MUSTACHE
+    { id:'mustache_classic', label:'שפם קלאסי', slot:'mustache',
+      face:`
+        <path d="M102 214 Q122 202 140 210 Q158 202 178 214 Q158 222 140 216 Q122 222 102 214Z"
+          fill="#3D2C1E" stroke="#2A1A0E" stroke-width="1.5"/>`,
+      preview:`<svg viewBox="94 198 92 28" xmlns="http://www.w3.org/2000/svg">
+        <path d="M102 214 Q122 202 140 210 Q158 202 178 214 Q158 222 140 216 Q122 222 102 214Z"
+          fill="#3D2C1E" stroke="#2A1A0E" stroke-width="1.5"/></svg>` },
+
+    { id:'mustache_curly', label:'שפם מתולתל', slot:'mustache',
+      face:`
+        <path d="M108 214 C106 204 118 200 124 207 C130 213 136 210 140 210
+                 C144 210 150 213 156 207 C162 200 174 204 172 214
+                 C166 217 158 209 150 212 C146 215 143 219 140 219
+                 C137 219 134 215 130 212 C122 209 114 217 108 214Z"
+          fill="#3D2C1E" stroke="#2A1A0E" stroke-width="1.5"/>`,
+      preview:`<svg viewBox="100 196 80 28" xmlns="http://www.w3.org/2000/svg">
+        <path d="M108 214 C106 204 118 200 124 207 C130 213 136 210 140 210
+                 C144 210 150 213 156 207 C162 200 174 204 172 214
+                 C166 217 158 209 150 212 C146 215 143 219 140 219
+                 C137 219 134 215 130 212 C122 209 114 217 108 214Z"
+          fill="#3D2C1E" stroke="#2A1A0E" stroke-width="1.5"/></svg>` },
+
+    { id:'mustache_thick', label:'שפם עבה', slot:'mustache',
+      face:`
+        <ellipse cx="140" cy="214" rx="44" ry="11" fill="#3D2C1E" stroke="#2A1A0E" stroke-width="1.5"/>
+        <ellipse cx="107" cy="218" rx="16" ry="8" fill="#3D2C1E"/>
+        <ellipse cx="173" cy="218" rx="16" ry="8" fill="#3D2C1E"/>`,
+      preview:`<svg viewBox="84 200 112 32" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="140" cy="214" rx="44" ry="11" fill="#3D2C1E" stroke="#2A1A0E" stroke-width="1.5"/>
+        <ellipse cx="107" cy="218" rx="16" ry="8" fill="#3D2C1E"/>
+        <ellipse cx="173" cy="218" rx="16" ry="8" fill="#3D2C1E"/></svg>` },
+
+    { id:'mustache_thin', label:'שפם דק', slot:'mustache',
+      face:`
+        <path d="M104 213 Q122 206 140 210 Q158 206 176 213"
+          fill="none" stroke="#3D2C1E" stroke-width="4.5" stroke-linecap="round"/>`,
+      preview:`<svg viewBox="96 202 88 18" xmlns="http://www.w3.org/2000/svg">
+        <path d="M104 213 Q122 206 140 210 Q158 206 176 213"
+          fill="none" stroke="#3D2C1E" stroke-width="4.5" stroke-linecap="round"/></svg>` },
+
+    { id:'mustache_rainbow', label:'שפם צבעוני', slot:'mustache',
+      face:`
+        <path d="M100 216 Q120 202 140 210 Q160 202 180 216 Q160 226 140 220 Q120 226 100 216Z"
+          fill="#CC44AA" stroke="#2A1A0E" stroke-width="1.5"/>
+        <path d="M100 216 Q120 202 140 210 Q160 202 180 216" fill="none" stroke="#FF4444" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+        <path d="M102 219 Q121 209 140 214 Q159 209 178 219" fill="none" stroke="#4488FF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>`,
+      preview:`<svg viewBox="92 198 96 32" xmlns="http://www.w3.org/2000/svg">
+        <path d="M100 216 Q120 202 140 210 Q160 202 180 216 Q160 226 140 220 Q120 226 100 216Z"
+          fill="#CC44AA" stroke="#2A1A0E" stroke-width="1.5"/>
+        <path d="M100 216 Q120 202 140 210 Q160 202 180 216" fill="none" stroke="#FF4444" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+        <path d="M102 219 Q121 209 140 214 Q159 209 178 219" fill="none" stroke="#4488FF" stroke-width="2" stroke-linecap="round" opacity="0.6"/></svg>` },
+
+    // ── CLOWN / FUN ACCESSORIES ──
+    { id:'hat_clown', label:'כובע ליצן', slot:'hat',
+      face:`
+        <!-- tall pointy clown hat -->
+        <polygon points="140,2 90,70 190,70" fill="#FF3399" stroke="#CC0077" stroke-width="2.5"/>
+        <!-- polka dots on hat -->
+        <circle cx="128" cy="26" r="6" fill="#FFFF00"/>
+        <circle cx="152" cy="44" r="5" fill="#00FFFF"/>
+        <circle cx="118" cy="50" r="4" fill="#FFFFFF"/>
+        <circle cx="162" cy="22" r="4" fill="#AAFFAA"/>
+        <!-- hat brim -->
+        <ellipse cx="140" cy="70" rx="58" ry="12" fill="#FF3399" stroke="#CC0077" stroke-width="2"/>
+        <!-- pom pom on tip -->
+        <circle cx="140" cy="4"  r="10" fill="#FFFF00" stroke="#CCCC00" stroke-width="1.5"/>
+        <circle cx="136" cy="2"  r="3"  fill="white" opacity="0.3"/>`,
+      preview:`<svg viewBox="80 -6 120 86" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="140,2 90,70 190,70" fill="#FF3399" stroke="#CC0077" stroke-width="2.5"/>
+        <circle cx="128" cy="26" r="6" fill="#FFFF00"/>
+        <circle cx="152" cy="44" r="5" fill="#00FFFF"/>
+        <circle cx="118" cy="50" r="4" fill="#FFFFFF"/>
+        <ellipse cx="140" cy="70" rx="58" ry="12" fill="#FF3399" stroke="#CC0077" stroke-width="2"/>
+        <circle cx="140" cy="4"  r="10" fill="#FFFF00" stroke="#CCCC00" stroke-width="1.5"/>
+      </svg>` },
+
+    { id:'hat_afro', label:'פאה אפרו', slot:'hat',
+      face:`
+        <!-- big rainbow afro wig -->
+        <ellipse cx="140" cy="38" rx="112" ry="72" fill="#FF6633"/>
+        <!-- color sections -->
+        <path d="M40 60 C50 20 90 4 140 4 C190 4 230 20 240 60
+                 C220 40 190 28 140 28 C90 28 60 40 40 60Z" fill="#FF3300" opacity="0.5"/>
+        <ellipse cx="74"  cy="42" rx="28" ry="22" fill="#FF8844" opacity="0.6"/>
+        <ellipse cx="206" cy="42" rx="28" ry="22" fill="#FF8844" opacity="0.6"/>
+        <ellipse cx="110" cy="20" rx="22" ry="18" fill="#FFAA00" opacity="0.5"/>
+        <ellipse cx="170" cy="20" rx="22" ry="18" fill="#FFAA00" opacity="0.5"/>
+        <!-- curly texture circles -->
+        <circle cx="58"  cy="54" r="12" fill="#FF5522" opacity="0.6"/>
+        <circle cx="76"  cy="30" r="10" fill="#FF7733" opacity="0.5"/>
+        <circle cx="100" cy="14" r="11" fill="#FFAA00" opacity="0.5"/>
+        <circle cx="126" cy="8"  r="10" fill="#FF8800" opacity="0.5"/>
+        <circle cx="154" cy="8"  r="10" fill="#FF8800" opacity="0.5"/>
+        <circle cx="180" cy="14" r="11" fill="#FFAA00" opacity="0.5"/>
+        <circle cx="204" cy="30" r="10" fill="#FF7733" opacity="0.5"/>
+        <circle cx="222" cy="54" r="12" fill="#FF5522" opacity="0.6"/>
+        <!-- center part showing scalp line -->
+        <ellipse cx="140" cy="78" rx="90" ry="14" fill="#FDDBB4"/>`,
+      preview:`<svg viewBox="22 -4 236 90" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="140" cy="38" rx="112" ry="72" fill="#FF6633"/>
+        <path d="M40 60 C50 20 90 4 140 4 C190 4 230 20 240 60 C220 40 190 28 140 28 C90 28 60 40 40 60Z" fill="#FF3300" opacity="0.5"/>
+        <circle cx="58"  cy="54" r="12" fill="#FF5522" opacity="0.6"/>
+        <circle cx="100" cy="14" r="11" fill="#FFAA00" opacity="0.5"/>
+        <circle cx="140" cy="8"  r="10" fill="#FF8800" opacity="0.5"/>
+        <circle cx="180" cy="14" r="11" fill="#FFAA00" opacity="0.5"/>
+        <circle cx="222" cy="54" r="12" fill="#FF5522" opacity="0.6"/>
+        <ellipse cx="140" cy="78" rx="90" ry="14" fill="#FDDBB4"/>
+      </svg>` },
+
+    { id:'hat_party', label:'כובע מסיבה', slot:'hat',
+      face:`
+        <!-- party/birthday cone hat -->
+        <polygon points="140,4 96,68 184,68" fill="#FFDD00" stroke="#CCAA00" stroke-width="2"/>
+        <!-- diagonal stripes -->
+        <path d="M140 4 L96 68" stroke="#FF4444" stroke-width="4" opacity="0.5"/>
+        <path d="M140 4 L184 68" stroke="#4444FF" stroke-width="4" opacity="0.5"/>
+        <path d="M122 12 L102 56" stroke="#44CC44" stroke-width="3" opacity="0.4"/>
+        <path d="M158 12 L178 56" stroke="#FF88CC" stroke-width="3" opacity="0.4"/>
+        <!-- hat band -->
+        <path d="M96 68 Q140 80 184 68" fill="#FF4444" stroke="#CC2222" stroke-width="2"/>
+        <!-- elastic string -->
+        <path d="M96 68 Q70 90 66 110" fill="none" stroke="#888" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <path d="M184 68 Q210 90 214 110" fill="none" stroke="#888" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <!-- pom pom -->
+        <circle cx="140" cy="6"  r="9" fill="#FF4488" stroke="#CC2266" stroke-width="1.5"/>
+        <circle cx="137" cy="4"  r="3" fill="white" opacity="0.3"/>`,
+      preview:`<svg viewBox="84 -2 112 82" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="140,4 96,68 184,68" fill="#FFDD00" stroke="#CCAA00" stroke-width="2"/>
+        <path d="M140 4 L96 68" stroke="#FF4444" stroke-width="4" opacity="0.5"/>
+        <path d="M140 4 L184 68" stroke="#4444FF" stroke-width="4" opacity="0.5"/>
+        <path d="M96 68 Q140 80 184 68" fill="#FF4444" stroke="#CC2222" stroke-width="2"/>
+        <circle cx="140" cy="6" r="9" fill="#FF4488" stroke="#CC2266" stroke-width="1.5"/>
+      </svg>` },
+
+    { id:'glasses_flower', label:'משקפי פרח', slot:'glasses',
+      face:`
+        <!-- flower glasses — petals as lenses -->
+        <!-- left flower -->
+        <circle cx="88"  cy="126" r="12" fill="#FF6699" opacity="0.8" transform="rotate(0,88,126)"/>
+        <circle cx="88"  cy="108" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="88"  cy="144" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="72"  cy="126" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="104" cy="126" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="76"  cy="114" r="9"  fill="#FF88AA" opacity="0.6"/>
+        <circle cx="100" cy="114" r="9"  fill="#FF88AA" opacity="0.6"/>
+        <circle cx="76"  cy="138" r="9"  fill="#FF88AA" opacity="0.6"/>
+        <circle cx="100" cy="138" r="9"  fill="#FF88AA" opacity="0.6"/>
+        <circle cx="88"  cy="126" r="11" fill="#FFEE44" stroke="#CCAA00" stroke-width="1.5"/>
+        <!-- right flower -->
+        <circle cx="192" cy="126" r="12" fill="#FF6699" opacity="0.8"/>
+        <circle cx="192" cy="108" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="192" cy="144" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="176" cy="126" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="208" cy="126" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="180" cy="114" r="9"  fill="#FF88AA" opacity="0.6"/>
+        <circle cx="204" cy="114" r="9"  fill="#FF88AA" opacity="0.6"/>
+        <circle cx="180" cy="138" r="9"  fill="#FF88AA" opacity="0.6"/>
+        <circle cx="204" cy="138" r="9"  fill="#FF88AA" opacity="0.6"/>
+        <circle cx="192" cy="126" r="11" fill="#FFEE44" stroke="#CCAA00" stroke-width="1.5"/>
+        <!-- bridge -->
+        <line x1="116" y1="124" x2="164" y2="124" stroke="#CC3366" stroke-width="3"/>`,
+      preview:`<svg viewBox="56 96 168 64" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="88"  cy="126" r="12" fill="#FF6699" opacity="0.8"/>
+        <circle cx="88"  cy="108" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="88"  cy="144" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="72"  cy="126" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="104" cy="126" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="88"  cy="126" r="11" fill="#FFEE44" stroke="#CCAA00" stroke-width="1.5"/>
+        <circle cx="192" cy="126" r="12" fill="#FF6699" opacity="0.8"/>
+        <circle cx="192" cy="108" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="192" cy="144" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="176" cy="126" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="208" cy="126" r="10" fill="#FF6699" opacity="0.75"/>
+        <circle cx="192" cy="126" r="11" fill="#FFEE44" stroke="#CCAA00" stroke-width="1.5"/>
+        <line x1="116" y1="124" x2="164" y2="124" stroke="#CC3366" stroke-width="3"/>
+      </svg>` },
+
+    { id:'mustache_handlebar', label:'שפם מסולסל', slot:'mustache',
+      face:`
+        <!-- handlebar mustache with upward curled ends -->
+        <path d="M106 214 C106 206 116 202 124 207 C130 211 136 210 140 210
+                 C144 210 150 211 156 207 C164 202 174 206 174 214
+                 C168 216 160 210 152 212 C148 214 144 218 140 218
+                 C136 218 132 214 128 212 C120 210 112 216 106 214Z"
+          fill="#3D2C1E" stroke="#2A1A0E" stroke-width="1.5"/>
+        <!-- left curl going up -->
+        <path d="M106 214 C100 210 94 204 92 196 C90 188 96 184 102 188"
+          fill="none" stroke="#3D2C1E" stroke-width="5" stroke-linecap="round"/>
+        <!-- right curl going up -->
+        <path d="M174 214 C180 210 186 204 188 196 C190 188 184 184 178 188"
+          fill="none" stroke="#3D2C1E" stroke-width="5" stroke-linecap="round"/>`,
+      preview:`<svg viewBox="84 178 112 44" xmlns="http://www.w3.org/2000/svg">
+        <path d="M106 214 C106 206 116 202 124 207 C130 211 136 210 140 210
+                 C144 210 150 211 156 207 C164 202 174 206 174 214
+                 C168 216 160 210 152 212 C148 214 144 218 140 218
+                 C136 218 132 214 128 212 C120 210 112 216 106 214Z" fill="#3D2C1E"/>
+        <path d="M106 214 C100 210 94 204 92 196 C90 188 96 184 102 188"
+          fill="none" stroke="#3D2C1E" stroke-width="5" stroke-linecap="round"/>
+        <path d="M174 214 C180 210 186 204 188 196 C190 188 184 184 178 188"
+          fill="none" stroke="#3D2C1E" stroke-width="5" stroke-linecap="round"/>
+      </svg>` },
+  ],
+};
+
+// ── State ─────────────────────────────────────────────────────────
+// accessories has sub-slots: hat, glasses, mustache — each independently toggled
+const state = { eyes:null, eyebrows:null, nose:null, mouth:null, ears:null,
+                hat:null, glasses:null, mustache:null };
+
+const catMeta = {
+  eyes:        { label:'👁️ עיניים',   gId:'gEyes' },
+  eyebrows:    { label:'〰️ גבות',    gId:'gEyebrows' },
+  nose:        { label:'👃 אף',       gId:'gNose' },
+  mouth:       { label:'👄 פה',       gId:'gMouth' },
+  ears:        { label:'👂 אוזניים',  gId:null },
+  accessories: { label:'🎩 אביזרים', gId:null },
+};
+let currentCat='eyes', dragging=null, ghostEl=null;
+
+function applyPart(cat, id) {
+  try {
+  const item = parts[cat]?.find(i=>i.id===id);
+  if (!item) return;
+
+  if (cat === 'ears') {
+    state.ears = id;
+    document.getElementById('gEarLeft').innerHTML  = item.lc;
+    document.getElementById('gEarRight').innerHTML = item.rc;
+  } else if (cat === 'accessories') {
+    // toggle: clicking same item removes it
+    const slot = item.slot; // 'hat' | 'glasses' | 'mustache'
+    if (state[slot] === id) {
+      // remove
+      state[slot] = null;
+      document.getElementById('g' + slot.charAt(0).toUpperCase() + slot.slice(1)).innerHTML = '';
+    } else {
+      state[slot] = id;
+      document.getElementById('g' + slot.charAt(0).toUpperCase() + slot.slice(1)).innerHTML = item.face;
+    }
+    // update card selected states for this category
+    document.querySelectorAll('.option-card[data-cat="accessories"]').forEach(c => {
+      const cItem = parts.accessories?.find(i=>i.id===c.dataset.id);
+      c.classList.toggle('selected', cItem && state[cItem.slot] === cItem.id);
+    });
+  } else {
+    state[cat] = id;
+    document.getElementById(catMeta[cat].gId).innerHTML = item.face;
+  }
+
+  const coreState = { eyes:state.eyes, eyebrows:state.eyebrows, nose:state.nose, mouth:state.mouth, ears:state.ears };
+  if (Object.values(coreState).every(v=>v!==null))
+    document.getElementById('emptyHints').style.opacity='0';
+  updateEmotion();
+  } catch(e) { console.error('applyPart crash:', cat, id, e.stack || e.message); alert('שגיאה: ' + e.message + '\ncat=' + cat + ' id=' + id); }
+}
+
+function updateEmotion() {
+  const placed = Object.entries(state).filter(([,v])=>v!==null);
+  if (!placed.length) {
+    document.getElementById('emotionTag').textContent='🙂 גרור פריטים לפנים!';
+    document.getElementById('btnSpeak').disabled = true;
+    return;
+  }
+  const counts={};
+  const skipSlots = new Set(['hat','glasses','mustache']);
+  placed.forEach(([cat,id])=>{
+    if(skipSlots.has(cat)) return;
+    const arr = parts[cat];
+    if(!arr) return;
+    const it = arr.find(i=>i.id===id);
+    if(it?.emotion) counts[it.emotion]=(counts[it.emotion]||0)+1;
+  });
+  const [top]=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const em={שמח:'😄',מאושר:'😁',עצוב:'😢',כועס:'😠',מופתע:'😲',ניטרלי:'😐',שובב:'😜',ישנוני:'😴',מתלהב:'🤩',רציני:'😤',עדין:'🙂',קומי:'🤪',חמוד:'🥰',אלפי:'🧝',עיוות:'😵'};
+  document.getElementById('emotionTag').textContent=`${em[top[0]]||'😐'} ${top[0]}`;
+  document.getElementById('btnSpeak').disabled = false;
+}
+
+// ── DESCRIBE & SPEAK FACE ─────────────────────────────────────────
+// Maps eye+mouth emotion combos → spoken sentence
+// Only eyes and mouth matter for the emotion read-out.
+const emotionPhrases = {
+  // eye_emotion → mouth_emotion → phrase
+  'שמח':    { 'שמח':'איזה פרצוף שָׂמֵחַ!', 'מאושר':'פרצוף שָׂמֵחַ ומאושר!', 'ניטרלי':'פרצוף קצת שָׂמֵחַ.', 'עצוב':'פרצוף מבולבל — עיניים שמחות אבל פה עצוב. יצא פרצוף מוזר!', 'כועס':'פרצוף מוזר — עיניים שמחות אבל פה כועס!', 'מופתע':'פרצוף שָׂמֵחַ ומופתע!', 'שובב':'פרצוף שָׂמֵחַ ושובב!', 'מאושר':'פרצוף שָׂמֵחַ מאוד!' },
+  'עצוב':   { 'עצוב':'פרצוף עצוב מאוד.', 'שמח':'פרצוף מבולבל — עיניים עצובות אבל פה שָׂמֵחַ. יצא פרצוף מוזר!', 'מאושר':'פרצוף מוזר — עיניים עצובות אבל חיוך ענק!', 'ניטרלי':'פרצוף קצת עצוב.', 'כועס':'פרצוף עצוב וכועס.', 'מופתע':'פרצוף עצוב ומופתע.', 'שובב':'יצא פרצוף מוזר — עיניים עצובות עם לשון בחוץ!' },
+  'כועס':   { 'כועס':'פרצוף כועס מאוד!', 'שמח':'פרצוף מוזר — עיניים כועסות אבל פה שָׂמֵחַ!', 'מאושר':'יצא פרצוף מוזר — עיניים כועסות עם חיוך ענק!', 'עצוב':'פרצוף כועס ועצוב.', 'ניטרלי':'פרצוף כועס.', 'מופתע':'פרצוף כועס ומופתע!', 'שובב':'פרצוף כועס עם לשון — יצא מוזר!' },
+  'מופתע':  { 'מופתע':'וואו, פרצוף מופתע!', 'שמח':'פרצוף מופתע ושָׂמֵחַ!', 'עצוב':'פרצוף מופתע ועצוב.', 'כועס':'פרצוף מופתע וכועס.', 'ניטרלי':'פרצוף קצת מופתע.', 'שובב':'פרצוף מופתע ושובב!' },
+  'שובב':   { 'שמח':'פרצוף שובב וצוחק!', 'שובב':'פרצוף שובב מאוד!', 'מאושר':'פרצוף שובב ומאושר!', 'ניטרלי':'פרצוף קצת שובב.', 'עצוב':'יצא פרצוף מוזר — עין עצומה אבל פה עצוב!', 'כועס':'פרצוף מוזר — עין עצומה אבל כועס!' },
+  'ישנוני': { 'ניטרלי':'פרצוף ישנוני.', 'שמח':'פרצוף ישנוני אבל מחייך.', 'עצוב':'פרצוף עייף ועצוב.', 'כועס':'פרצוף עייף אבל כועס — יצא מוזר!', 'מופתע':'פרצוף מופתע שנשאר ישנוני — יצא מוזר!', 'שובב':'פרצוף ישנוני עם לשון בחוץ — מוזר!' },
+  'מתלהב':  { 'שמח':'פרצוף מתלהב ושמח!', 'מאושר':'פרצוף מתלהב ומאושר!', 'מופתע':'פרצוף מתלהב ומופתע!', 'ניטרלי':'פרצוף מתלהב.', 'עצוב':'יצא פרצוף מוזר — עיני כוכבים אבל פה עצוב!', 'כועס':'יצא פרצוף מוזר — עיני כוכבים אבל כועס!' },
+  'ניטרלי': { 'ניטרלי':'פרצוף ניטרלי ורגוע.', 'שמח':'פרצוף עם חיוך.', 'עצוב':'פרצוף קצת עצוב.', 'כועס':'פרצוף קצת כועס.', 'מופתע':'פרצוף קצת מופתע.', 'שובב':'פרצוף קצת שובב.', 'מאושר':'פרצוף שמח!' },
+};
+
+const fallbackPhrases = [
+  'יצא פרצוף מוזר!',
+  'מה הפרצוף הזה? יצא מוזר לגמרי!',
+  'פרצוף מוזר ומיוחד!',
+];
+
+function buildFaceDescription() {
+  const eyeId   = state.eyes;
+  const mouthId = state.mouth;
+
+  // need at least one of the two
+  if (!eyeId && !mouthId) return null;
+
+  const eyeEmotion   = eyeId   ? parts.eyes?.find(i=>i.id===eyeId)?.emotion   : null;
+  const mouthEmotion = mouthId ? parts.mouth?.find(i=>i.id===mouthId)?.emotion : null;
+
+  // both present → look up combo
+  if (eyeEmotion && mouthEmotion) {
+    const row = emotionPhrases[eyeEmotion];
+    if (row?.[mouthEmotion]) return row[mouthEmotion];
+    // combo not in table → weird
+    return fallbackPhrases[Math.floor(Math.random()*fallbackPhrases.length)];
+  }
+
+  // only one present
+  const solo = eyeEmotion || mouthEmotion;
+  const soloMap = { שמח:'פרצוף שָׂמֵחַ!', עצוב:'פרצוף עצוב.', כועס:'פרצוף כועס!', מופתע:'פרצוף מופתע!', שובב:'פרצוף שובב!', ישנוני:'פרצוף ישנוני.', מתלהב:'פרצוף מתלהב!', ניטרלי:'פרצוף ניטרלי.', מאושר:'פרצוף מאושר!', עדין:'פרצוף עדין.' };
+  return soloMap[solo] || 'פרצוף מיוחד!';
+}
+
+let currentUtterance = null;
+
+function speakFace() {
+  if (!('speechSynthesis' in window)) {
+    alert('הדפדפן שלך לא תומך בהקראה.');
+    return;
+  }
+
+  const btn = document.getElementById('btnSpeak');
+
+  // If already speaking — stop
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    btn.classList.remove('speaking');
+    btn.querySelector('.speak-icon').textContent = '🔊';
+    return;
+  }
+
+  const text = buildFaceDescription();
+  if (!text) return;
+
+  currentUtterance = new SpeechSynthesisUtterance(text);
+  currentUtterance.lang = 'he-IL';
+  currentUtterance.rate = 0.92;
+  currentUtterance.pitch = 1.05;
+
+  // Try to pick a Hebrew voice
+  const voices = window.speechSynthesis.getVoices();
+  const heVoice = voices.find(v => v.lang.startsWith('he')) || voices.find(v => v.lang.startsWith('iw'));
+  if (heVoice) currentUtterance.voice = heVoice;
+
+  currentUtterance.onstart = () => {
+    btn.classList.add('speaking');
+    btn.querySelector('.speak-icon').textContent = '⏹';
+  };
+  currentUtterance.onend = currentUtterance.onerror = () => {
+    btn.classList.remove('speaking');
+    btn.querySelector('.speak-icon').textContent = '🔊';
+  };
+
+  window.speechSynthesis.speak(currentUtterance);
+}
+
+function selectCategory(cat) {
+  currentCat=cat;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+cat).classList.add('active');
+  document.getElementById('optionsTitle').textContent=catMeta[cat].label;
+  const grid=document.getElementById('optionsGrid');
+  grid.innerHTML='';
+  parts[cat].forEach(item=>{
+    const card=document.createElement('div');
+    // accessories: each item selected based on its slot state
+    const isSelected = cat==='accessories'
+      ? state[item.slot]===item.id
+      : state[cat]===item.id;
+    card.className='option-card'+(isSelected?' selected':'');
+    card.dataset.cat=cat; card.dataset.id=item.id;
+    card.addEventListener('click',()=>{
+      applyPart(cat,item.id);
+      if(cat!=='accessories'){
+        grid.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected'));
+        card.classList.add('selected');
+      }
+    });
+    card.addEventListener('mousedown',e=>{ if(e.button===0) startDrag(e,cat,item); });
+    const pv=document.createElement('div'); pv.className='option-preview'; pv.innerHTML=item.preview||'';
+    // group label for accessories
+    const lb=document.createElement('div'); lb.className='option-label';
+    if(cat==='accessories'){
+      const slotLabel = {hat:'כובע',glasses:'משקפיים',mustache:'שפם'}[item.slot]||'';
+      lb.innerHTML=`<span style="font-size:0.65rem;opacity:0.7">${slotLabel}</span><br>${item.label}`;
+    } else {
+      lb.textContent=item.label+(item.emotion?` (${item.emotion})`:'');
+    }
+    card.appendChild(pv); card.appendChild(lb); grid.appendChild(card);
+  });
+}
+
+function startDrag(e,cat,item){
+  dragging={cat,item};
+  ghostEl=document.createElement('div'); ghostEl.className='drag-ghost'; ghostEl.innerHTML=item.preview||'';
+  document.body.appendChild(ghostEl); moveGhost(e.clientX,e.clientY);
+  document.addEventListener('mousemove',onMove); document.addEventListener('mouseup',onUp); e.preventDefault();
+}
+function moveGhost(x,y){ if(ghostEl){ ghostEl.style.left=x+'px'; ghostEl.style.top=y+'px'; } }
+function overFace(x,y){ const r=document.getElementById('faceContainer').getBoundingClientRect(); return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom; }
+function onMove(e){ moveGhost(e.clientX,e.clientY); document.getElementById('faceContainer').classList.toggle('drag-over',overFace(e.clientX,e.clientY)); }
+function onUp(e){
+  document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp);
+  if(ghostEl){ghostEl.remove();ghostEl=null;}
+  document.getElementById('faceContainer').classList.remove('drag-over');
+  if(!dragging) return;
+  if(overFace(e.clientX,e.clientY)){
+    const {cat,item}=dragging; applyPart(cat,item.id);
+    if(cat!=='accessories'){
+      document.querySelectorAll('.option-card').forEach(c=>c.classList.toggle('selected',c.dataset.id===item.id&&c.dataset.cat===cat));
+    }
+    const gId=catMeta[cat].gId;
+    if(gId){ const g=document.getElementById(gId); g.style.transition='transform 0.36s cubic-bezier(0.34,1.9,0.64,1)'; g.style.transform='scale(1.18)'; setTimeout(()=>{ g.style.transform='scale(1)'; },380); }
+  }
+  dragging=null;
+}
+
+function resetFace(){
+  if (window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
+  const btn = document.getElementById('btnSpeak');
+  btn.classList.remove('speaking');
+  btn.querySelector('.speak-icon').textContent = '🔊';
+  btn.disabled = true;
+  Object.keys(state).forEach(k=>state[k]=null);
+  ['gEyebrows','gEyes','gNose','gMouth','gEarLeft','gEarRight','gGlasses','gMustache','gHat'].forEach(id=>{ document.getElementById(id).innerHTML=''; });
+  document.getElementById('emptyHints').style.opacity='1';
+  document.getElementById('emotionTag').textContent='🙂 גרור פריטים לפנים!';
+  selectCategory(currentCat);
+}
+
+window.onload=()=>selectCategory('eyes');
+</script>
+</body>
+</html>

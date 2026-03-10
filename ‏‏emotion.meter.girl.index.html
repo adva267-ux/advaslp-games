@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>מד הרגשות</title>
+  <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 60% 0%, #ffe0f7 0%, #e0f0ff 40%, #d4f7e0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Varela Round', 'Segoe UI', sans-serif;
+      direction: rtl;
+      padding: 24px 16px;
+      user-select: none;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .title h1 {
+      color: #2d2d5e;
+      font-size: 2rem;
+      font-weight: 900;
+      text-align: center;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.8);
+      letter-spacing: 0.02em;
+    }
+    .title p {
+      color: #6060a0;
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    .meter-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .zone-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-radius: 20px;
+      padding: 10px 16px;
+      position: relative;
+      min-height: 74px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+    }
+    .zone-row:hover { transform: scale(1.015); }
+    .zone-row.highlight {
+      box-shadow: 0 0 0 4px #fff, 0 6px 24px rgba(0,0,0,0.18);
+      transform: scale(1.025);
+    }
+
+    .zone-face-fixed {
+      font-size: 2.4rem;
+      flex-shrink: 0;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.18));
+    }
+    .zone-label {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.25);
+      flex: 1;
+    }
+    .zone-drop {
+      width: 64px;
+      height: 56px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.22);
+      border: 2.5px dashed rgba(255,255,255,0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s;
+      font-size: 2rem;
+    }
+    .zone-drop.drag-over {
+      background: rgba(255,255,255,0.45);
+      border-color: #fff;
+    }
+
+    .child-panel {
+      width: 100%;
+      background: rgba(255,255,255,0.55);
+      border-radius: 24px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 4px 24px rgba(100,100,200,0.12);
+      border: 2px solid rgba(255,255,255,0.8);
+    }
+    .child-hint { color: #5050a0; font-size: 0.82rem; font-weight: 700; }
+    .child-figure {
+      cursor: grab;
+      font-size: 4rem;
+      display: inline-block;
+      transition: transform 0.15s;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+      line-height: 1;
+    }
+    .child-figure:active { cursor: grabbing; transform: scale(1.1); }
+    .child-figure.placed { opacity: 0.35; cursor: default; }
+
+    .feeling-box {
+      display: none;
+      border-radius: 16px;
+      padding: 14px 20px;
+      text-align: center;
+      animation: popIn 0.4s cubic-bezier(.34,1.56,.64,1) both;
+      border: 2px solid rgba(255,255,255,0.7);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .feeling-box.visible { display: block; }
+    .feeling-text {
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+    .speak-btn {
+      margin-top: 10px;
+      background: rgba(255,255,255,0.25);
+      border: 2px solid rgba(255,255,255,0.7);
+      border-radius: 50px;
+      padding: 8px 22px;
+      font-size: 1rem;
+      font-family: inherit;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-inline: auto;
+    }
+    .speak-btn:hover { background: rgba(255,255,255,0.45); transform: scale(1.06); }
+    .speak-btn.speaking {
+      background: rgba(255,255,255,0.5);
+      animation: pulse 0.7s ease infinite alternate;
+    }
+
+    .reset-btn {
+      background: #fff;
+      color: #4040a0;
+      border: 2.5px solid #c0c0ff;
+      border-radius: 50px;
+      padding: 12px 40px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.18s;
+      box-shadow: 0 4px 16px rgba(100,100,200,0.12);
+      letter-spacing: 0.03em;
+    }
+    .reset-btn:hover { background: #4040a0; color: #fff; transform: scale(1.05); }
+
+    #drag-ghost {
+      position: fixed;
+      pointer-events: none;
+      font-size: 3.5rem;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      display: none;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.3));
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 20, 60, 0.55);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 28px;
+      padding: 28px 22px 22px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+      transform: scale(0.88) translateY(24px);
+      transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
+      direction: rtl;
+      position: relative;
+    }
+    .modal-overlay.open .modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-title {
+      font-size: 1.3rem;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 6px;
+      color: #2d2d5e;
+    }
+    .modal-subtitle {
+      font-size: 0.85rem;
+      text-align: center;
+      color: #8080b0;
+      margin-bottom: 20px;
+    }
+
+    .solutions-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .solution-card {
+      border-radius: 18px;
+      padding: 14px 8px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.18s;
+      border: 2.5px solid transparent;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+    .solution-card:hover {
+      transform: scale(1.06) translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+    }
+    .solution-card.speaking-card {
+      border-color: #fff;
+      animation: cardPulse 0.6s ease infinite alternate;
+    }
+    @keyframes cardPulse {
+      from { transform: scale(1); }
+      to   { transform: scale(1.06); }
+    }
+
+    .solution-icon {
+      font-size: 2.6rem;
+      line-height: 1;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.12));
+    }
+    .solution-label {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #fff;
+      text-align: center;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      line-height: 1.3;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: #f0f0f8;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      color: #5050a0;
+      font-weight: 900;
+    }
+    .modal-close:hover { background: #e0e0f5; }
+
+    @keyframes popIn {
+      from { transform: scale(0.4) rotate(-10deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to   { transform: scale(1.07); }
+    }
+
+    .zone-row.highlight .zone-drop .child-in-zone {
+      animation: bounce 0.8s ease infinite;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="title">
+    <h1>🌡️ מד הרגשות שלי</h1>
+    <p>גררי את הילדה אל הרגש שאת מרגישה עכשיו</p>
+  </div>
+
+  <div class="meter-wrapper" id="meter-wrapper"></div>
+
+  <div class="child-panel">
+    <div class="child-hint">אני מרגישה...</div>
+    <div class="child-figure" id="child-figure"
+         draggable="true"
+         ondragstart="onChildDragStart(event)"
+         ondragend="onChildDragEnd(event)">👧</div>
+  </div>
+
+  <div class="feeling-box" id="feeling-box">
+    <div class="feeling-text" id="feeling-text"></div>
+    <button class="speak-btn" id="speak-btn" onclick="speakFeeling()">
+      🔊 <span id="speak-label">הקרא</span>
+    </button>
+  </div>
+
+  <button class="reset-btn" onclick="resetAll()">🔄 איפוס</button>
+</div>
+
+<!-- Solutions Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-subtitle">לחץ על כרטיסייה כדי לשמוע</div>
+    <div class="solutions-grid" id="solutions-grid"></div>
+  </div>
+</div>
+
+<div id="drag-ghost">👧</div>
+
+<script>
+  const SOLUTIONS = {
+    red: [
+      { icon: "🏃", label: "לקפוץ ולזוז", text: "אפשר לקפוץ ולזוז כדי לשחרר את האנרגיה" },
+      { icon: "🛌", label: "להתכסות בשמיכה", text: "אפשר להתכסות בשמיכה ולנשום עמוק" },
+      { icon: "🔵", label: "למעוך כדור לחיץ", text: "אפשר למעוך כדור לחיץ עד שמרגישים טוב יותר" },
+    ],
+    orange: [
+      { icon: "🎨", label: "לצייר ולשרטט", text: "אפשר לצייר או לשרטט את מה שמרגישים" },
+      { icon: "💧", label: "לשתות מים", text: "אפשר לשתות כוס מים קרים ולנשום" },
+      { icon: "🌬️", label: "לנשום עמוק", text: "אפשר לנשום עמוק: פנימה אחת שתיים שלוש, החוצה אחת שתיים שלוש" },
+    ],
+    lightorange: [
+      { icon: "🗣️", label: "לדבר עם מישהו", text: "אפשר לדבר עם מישהו שאוהבים ולספר מה מפחיד" },
+      { icon: "🧸", label: "לחבק בובה", text: "אפשר לחבק בּוּבָּה אהובה ולהרגיש בטוחה" },
+      { icon: "🌬️", label: "לנשום לאט", text: "אפשר לנשום לאט ולספור עד חמש בכל נשימה" },
+    ],
+    yellow: [
+      { icon: "🎮", label: "לשחק", text: "אפשר לשחק במשחק אהוב" },
+      { icon: "🎵", label: "להאזין למוזיקה", text: "אפשר להאזין למוזיקה שְׂמֵחָה" },
+      { icon: "🌳", label: "לצאת החוצה", text: "אפשר לצאת החוצה לשחק ולהתאוורר" },
+    ],
+    green: [
+      { icon: "💃", label: "לרקוד", text: "אפשר לרקוד ולִשְׂמוֹחַ!" },
+      { icon: "👨‍👩‍👧", label: "לצחוק עם ההורים", text: "אפשר לִצְחוֹק ולִשְׂמוֹחַ עם אמא ואבא" },
+      { icon: "🎤", label: "לשיר", text: "אפשר לשיר שיר אהוב בקול רם" },
+    ],
+  };
+
+  const ZONES = [
+    { id: "red",         label: "כועסת מאוד", emoji: "😡", bg: "linear-gradient(135deg,#ff4e4e,#c0392b)", shadow: "#ff4e4e", sentence: "אני מרגישה כועסת מאוד", cardColors: ["#ff6b6b","#e74c3c","#c0392b"] },
+    { id: "orange",      label: "כועסת",      emoji: "😠", bg: "linear-gradient(135deg,#ff8c00,#e65c00)", shadow: "#ff8c00", sentence: "אני מרגישה כועסת",       cardColors: ["#ff9f43","#e67e22","#d35400"] },
+    { id: "lightorange", label: "מפחדת",      emoji: "😨", bg: "linear-gradient(135deg,#ffb347,#ff9500)", shadow: "#ffb347", sentence: "אני מרגישה מפחדת",       cardColors: ["#ffc36b","#ffb347","#ff9500"] },
+    { id: "yellow",      label: "בסדר",       emoji: "😐", bg: "linear-gradient(135deg,#ffd600,#f9a825)", shadow: "#ffd600", sentence: "אני מרגישה בסדר",        cardColors: ["#ffe066","#ffd600","#f9a825"] },
+    { id: "green",       label: "שמחה",       emoji: "😊", bg: "linear-gradient(135deg,#2ecc40,#1a8c2a)", shadow: "#2ecc40", sentence: "אני מרגישה שְׂמֵחָה",        cardColors: ["#55efc4","#2ecc71","#27ae60"] },
+  ];
+
+  let placedZoneId = null;
+  let isDragging = false;
+  let speakingCardId = null;
+  let femaleVoice = null;
+
+  function loadFemaleVoice() {
+    const voices = window.speechSynthesis.getVoices();
+    // Try to find a Hebrew female voice first
+    femaleVoice =
+      voices.find(v => v.lang === "he-IL" && /female|woman|f\b/i.test(v.name)) ||
+      voices.find(v => v.lang === "he-IL" && /anat|sara|מרים|רחל|דינה/i.test(v.name)) ||
+      voices.find(v => v.lang === "he-IL") ||
+      null;
+  }
+
+  if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = loadFemaleVoice;
+    loadFemaleVoice();
+  }
+
+  function applyVoice(utter) {
+    if (femaleVoice) utter.voice = femaleVoice;
+    utter.lang = "he-IL";
+  }
+
+  // Build zones
+  const wrapper = document.getElementById("meter-wrapper");
+  const orderedZones = [...ZONES].reverse();
+
+  orderedZones.forEach(zone => {
+    const row = document.createElement("div");
+    row.className = "zone-row";
+    row.id = "zone-row-" + zone.id;
+    row.style.background = zone.bg;
+    row.innerHTML = `
+      <div class="zone-drop" id="zone-drop-${zone.id}" data-zone="${zone.id}"></div>
+      <div class="zone-label">${zone.label}</div>
+      <div class="zone-face-fixed">${zone.emoji}</div>
+    `;
+    const dropEl = row.querySelector(".zone-drop");
+    dropEl.addEventListener("dragover", e => { e.preventDefault(); dropEl.classList.add("drag-over"); });
+    dropEl.addEventListener("dragleave", () => dropEl.classList.remove("drag-over"));
+    dropEl.addEventListener("drop", e => { e.preventDefault(); dropEl.classList.remove("drag-over"); placeChild(zone.id); });
+    row.addEventListener("click", () => { if (!isDragging) placeChild(zone.id); });
+    wrapper.appendChild(row);
+  });
+
+  function placeChild(zoneId) {
+    const fig = document.getElementById("child-figure");
+    if (fig.classList.contains("placed") && placedZoneId === zoneId) return;
+    clearPlaced();
+
+    placedZoneId = zoneId;
+    fig.classList.add("placed");
+
+    const dropEl = document.getElementById("zone-drop-" + zoneId);
+    dropEl.innerHTML = `<span class="child-in-zone" style="font-size:2rem">👧</span>`;
+
+    const row = document.getElementById("zone-row-" + zoneId);
+    row.classList.add("highlight");
+
+    const zone = ZONES.find(z => z.id === zoneId);
+    const box = document.getElementById("feeling-box");
+    box.style.background = zone.bg;
+    box.style.boxShadow = `0 6px 24px ${zone.shadow}55`;
+    box.classList.remove("visible");
+    void box.offsetWidth;
+    box.classList.add("visible");
+    document.getElementById("feeling-text").textContent = zone.sentence + " " + zone.emoji;
+
+    // Auto-speak then open modal
+    speakThenModal(zone);
+  }
+
+  function speakThenModal(zone) {
+    if (!window.speechSynthesis) { openModal(zone); return; }
+    window.speechSynthesis.cancel();
+
+    const btn = document.getElementById("speak-btn");
+    const label = document.getElementById("speak-label");
+    btn.classList.add("speaking");
+    label.textContent = "מקריא...";
+
+    const utter = new SpeechSynthesisUtterance(zone.sentence.trim());
+    applyVoice(utter);
+    utter.rate = 0.85;
+    utter.pitch = 1.2;
+
+    utter.onend = () => {
+      btn.classList.remove("speaking");
+      label.textContent = "הקרא";
+      setTimeout(() => openModal(zone), 300);
+    };
+    utter.onerror = () => {
+      btn.classList.remove("speaking");
+      label.textContent = "הקרא";
+      setTimeout(() => openModal(zone), 300);
+    };
+    window.speechSynthesis.speak(utter);
+  }
+
+  function openModal(zone) {
+    const solutions = SOLUTIONS[zone.id] || [];
+    document.getElementById("modal-title").textContent = "מה אני יכולה לעשות? " + zone.emoji;
+
+    const grid = document.getElementById("solutions-grid");
+    grid.innerHTML = "";
+    solutions.forEach((sol, i) => {
+      const card = document.createElement("div");
+      card.className = "solution-card";
+      card.id = "sol-card-" + i;
+      card.style.background = `linear-gradient(145deg, ${zone.cardColors[i] || zone.cardColors[0]}, ${zone.cardColors[Math.min(i+1, zone.cardColors.length-1)]})`;
+      card.innerHTML = `
+        <div class="solution-icon">${sol.icon}</div>
+        <div class="solution-label">${sol.label}</div>
+      `;
+      card.addEventListener("click", () => speakSolution(sol.text, i, zone));
+      card.addEventListener("touchend", (e) => { e.preventDefault(); speakSolution(sol.text, i, zone); });
+      grid.appendChild(card);
+    });
+
+    document.getElementById("modal-overlay").classList.add("open");
+  }
+
+  function speakSolution(text, idx, zone) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+
+    document.querySelectorAll(".solution-card").forEach(c => c.classList.remove("speaking-card"));
+    const card = document.getElementById("sol-card-" + idx);
+    if (card) card.classList.add("speaking-card");
+
+    const utter = new SpeechSynthesisUtterance(text);
+    applyVoice(utter);
+    utter.rate = 0.85;
+    utter.pitch = 1.2;
+    utter.onend = () => { if (card) card.classList.remove("speaking-card"); };
+    utter.onerror = () => { if (card) card.classList.remove("speaking-card"); };
+    window.speechSynthesis.speak(utter);
+  }
+
+  function closeModal() {
+    document.getElementById("modal-overlay").classList.remove("open");
+    window.speechSynthesis && window.speechSynthesis.cancel();
+    document.querySelectorAll(".solution-card").forEach(c => c.classList.remove("speaking-card"));
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById("modal-overlay")) closeModal();
+  }
+
+  function clearPlaced() {
+    document.querySelectorAll(".zone-drop").forEach(el => { el.innerHTML = ""; el.classList.remove("drag-over"); });
+    document.querySelectorAll(".zone-row").forEach(el => el.classList.remove("highlight"));
+    document.getElementById("child-figure").classList.remove("placed");
+    placedZoneId = null;
+  }
+
+  function resetAll() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    closeModal();
+    clearPlaced();
+    const box = document.getElementById("feeling-box");
+    box.classList.remove("visible");
+    const btn = document.getElementById("speak-btn");
+    btn.classList.remove("speaking");
+    document.getElementById("speak-label").textContent = "הקרא";
+  }
+
+  function speakFeeling() {
+    if (!window.speechSynthesis) return;
+    const text = document.getElementById("feeling-text").textContent.replace(/[\u{1F600}-\u{1F9FF}]/gu, "");
+    const btn = document.getElementById("speak-btn");
+    const label = document.getElementById("speak-label");
+
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      btn.classList.remove("speaking");
+      label.textContent = "הקרא";
+      return;
+    }
+
+    const utter = new SpeechSynthesisUtterance(text.trim());
+    applyVoice(utter);
+    utter.rate = 0.9;
+    utter.pitch = 1.2;
+    utter.onstart = () => { btn.classList.add("speaking"); label.textContent = "עצור"; };
+    utter.onend = () => { btn.classList.remove("speaking"); label.textContent = "הקרא"; };
+    utter.onerror = () => { btn.classList.remove("speaking"); label.textContent = "הקרא"; };
+    window.speechSynthesis.speak(utter);
+  }
+
+  // Drag
+  function onChildDragStart(e) {
+    if (document.getElementById("child-figure").classList.contains("placed")) { e.preventDefault(); return; }
+    isDragging = true;
+    e.dataTransfer.effectAllowed = "move";
+  }
+  function onChildDragEnd() { isDragging = false; }
+
+  const childFig = document.getElementById("child-figure");
+  const ghost = document.getElementById("drag-ghost");
+
+  childFig.addEventListener("touchstart", e => {
+    if (childFig.classList.contains("placed")) return;
+    isDragging = true;
+    ghost.style.display = "block";
+    moveGhost(e.touches[0]);
+  }, { passive: true });
+
+  document.addEventListener("touchmove", e => {
+    if (!isDragging) return;
+    moveGhost(e.touches[0]);
+  }, { passive: true });
+
+  document.addEventListener("touchend", e => {
+    if (!isDragging) return;
+    ghost.style.display = "none";
+    isDragging = false;
+    const touch = e.changedTouches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const zoneEl = el?.closest("[data-zone]");
+    if (zoneEl) { placeChild(zoneEl.dataset.zone); return; }
+    const rowEl = el?.closest(".zone-row");
+    if (rowEl) {
+      const id = rowEl.id.replace("zone-row-", "");
+      if (id) placeChild(id);
+    }
+  });
+
+  function moveGhost(touch) {
+    ghost.style.left = touch.clientX + "px";
+    ghost.style.top = touch.clientY + "px";
+  }
+</script>
+</body>
+</html>
